@@ -1,2 +1,3 @@
-# oula-learn
-oula learn code
+# EULER-learn
+EULER learn code
+欧拉50题
