@@ -325,7 +325,12 @@ set ${string}
 echo $#
 ```
 
-**44) **
+**44) export**
+
+设置或显示环境变量, export可新增，修改或删除环境变量，供后续执行的程序使用。export的效力仅及于该次登录操作
+
+export PATH=”$PATH:/home/user/bin” 增加 
+export -p 显示shell赋予程序的环境变量
 
 **45) 如何列出第二个字母是 a 或 b 的文件 ?**
 
@@ -455,4 +460,8 @@ b) 通过 `read` 命令
 
 `read -p "Destination backup Server : " desthost`
 
- 
+ **70)关于cut和tr**
+
+`cut -d "word" -f num` 截取以word为分割的第num个字符串
+
+`tr "word1" "word2"` 字符串中的Word1替换为Word2
