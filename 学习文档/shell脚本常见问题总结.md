@@ -465,3 +465,26 @@ b) 通过 `read` 命令
 `cut -d "word" -f num` 截取以word为分割的第num个字符串
 
 `tr "word1" "word2"` 字符串中的Word1替换为Word2
+
+**71)cat正向连续读 tac反向连续读nl输出行号显示文件more一页一页显示文件内容head只看头几行tail只看后几行**
+
+**72)按行输出文件**
+
+`sed -n 'a,bp' file`输出从a到b行
+
+**73)关于文件权限**
+
+`chmod option file`给文件赋予权限
+
+其中t是除创建者外其他用户不能删除
+
+s是临时赋予root权限
+
+**74)关于用户组**
+
+`groupadd name` 创建一个用户组
+
+`groups name`查看用户所有组
+
+`chgrp name name` 将文件加入用户组，或将用户组加入文件
+
