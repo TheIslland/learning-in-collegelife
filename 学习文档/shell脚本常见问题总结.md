@@ -488,3 +488,8 @@ s是临时赋予root权限
 
 `chgrp name name` 将文件加入用户组，或将用户组加入文件
 
+**75)关于命令替换**
+
+`alias name=“order”可以将命令替换为名为name的命令执行`
+
+写在`~/.bashrc`中`source ~/.bashrc`后可用
