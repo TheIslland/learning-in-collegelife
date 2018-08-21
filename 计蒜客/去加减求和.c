@@ -11,11 +11,11 @@
 int main() {
     int a, b;
     scanf("%d %d", &a,&b);
-    int c1, d;
+    int c, d;
     while (b != 0) {
-        c1 = a ^ b;
+        c = a ^ b;
         d = (a & b) << 1;
-        a = c1;
+        a = c;
         b = d;
     }
     printf("%d\n", a);
