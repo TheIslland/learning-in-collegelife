@@ -9,16 +9,16 @@ idle_1=`echo $cpu_1 | cut -d " " -f4`
 idle_2=`echo $cpu_2 | cut -d " " -f4`
 ((total=$total_2 - $total_1))
 ((idle=$idle_2 - $idle_1))
-((cpu_usage=$idle \* 100 / $total ))
-((cpu_usage=100 - $cpu_usage))
+cpu_usage=`echo "scale=2;$idle * 100 / $total" | bc`
+cpu_usage=`echo "100 - $cpu_usage" | bc`
 cpuload=(`cat /proc/loadavg | awk '{print $1,$2,$3}'`)
 load1=${cpuload[0]}
 load5=${cpuload[1]}
 load15=${cpuload[2]}
-cpu_temp=`cat /sys/class/thermal/thermal_zone0/temp | awk '{printf("%d",$1/1000)}'`
-if [[ $cpu_temp -le 50  ]]; then 
+cpu_temp=`cat /sys/class/thermal/thermal_zone0/temp | awk '{printf("%.2f",$1/1000)}'`
+if [[ $(echo "$cpu_temp <= 50" | bc)=1 ]]; then 
 cpu_state="normal"
-elif [[ $cpu_temp -le 70  ]]; then
+elif [[ $(echo "$cpu_temp <= 70" | bc)=1 ]]; then
 cpu_temp="note"
 else
 cpu_state="warning"
