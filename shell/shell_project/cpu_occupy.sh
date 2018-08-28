@@ -19,7 +19,7 @@ cpu_temp=`cat /sys/class/thermal/thermal_zone0/temp | awk '{printf("%.2f",$1/100
 if [[ $(echo "$cpu_temp <= 50" | bc)=1 ]]; then 
 cpu_state="normal"
 elif [[ $(echo "$cpu_temp <= 70" | bc)=1 ]]; then
-cpu_temp="note"
+cpu_state="note"
 else
 cpu_state="warning"
 fi
