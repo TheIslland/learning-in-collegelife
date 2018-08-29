@@ -1,1 +1,0 @@
-wget https://raw.githubusercontent.com/TheIslland/learning-in-collegelife/master/shell/auto_install_ss.sh && bash auto_install_ss.sh
