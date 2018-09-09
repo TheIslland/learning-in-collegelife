@@ -4,7 +4,6 @@
 	> Mail: 861436930@qq.com
 	> Created Time: 2018年09月09日 星期日 10时40分33秒
  ************************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,10 +12,9 @@ typedef struct Node{
     struct Node *next;
 }Node, *LinkedList;
 
-// 请在下面实现插入函数 insert
 LinkedList insert(LinkedList head, Node *node, int index) {
     if (head == NULL) {
-		if (index != 0) {
+        if (index != 0) {
             return head;
         }
         head = node;
@@ -33,11 +31,24 @@ LinkedList insert(LinkedList head, Node *node, int index) {
         current_node = current_node->next;
         count++;
     }
-    if(count == index - 1) {
+    if (count == index - 1) {
         node->next = current_node->next;
         current_node->next = node;
     }
     return head;
+}
+
+// 下面实现输出函数 output
+void output (LinkedList head) {
+	if(head == NULL) {
+		return;
+    }
+    Node *current_node = head;
+    while(current_node != NULL) {
+        printf("%d ",current_node->data);
+        current_node = current_node->next;
+    }
+    printf("\n");
 }
 
 void clear(LinkedList head) {
@@ -52,11 +63,12 @@ void clear(LinkedList head) {
 int main() {
     LinkedList linkedlist = NULL;
     for (int i = 1; i <= 10; i++) {
-		Node *node = (Node *)malloc(sizeof(Node));
+        Node *node = (Node *)malloc(sizeof(Node));
         node->data = i;
         node->next = NULL;
-        linkedlist = insert(linkedlist,node,i - 1);
+        linkedlist = insert(linkedlist, node, i - 1);
     }
+    output(linkedlist);
     clear(linkedlist);
     return 0;
 }
