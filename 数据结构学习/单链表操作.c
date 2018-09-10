@@ -38,17 +38,55 @@ LinkedList insert(LinkedList head, Node *node, int index) {
     return head;
 }
 
-// 下面实现输出函数 output
-void output (LinkedList head) {
-	if(head == NULL) {
-		return;
+void output(LinkedList head) {
+    if (head == NULL) {
+        return;
     }
     Node *current_node = head;
-    while(current_node != NULL) {
-        printf("%d ",current_node->data);
+    while (current_node != NULL) {
+        printf("%d ", current_node->data);
         current_node = current_node->next;
     }
     printf("\n");
+}
+
+LinkedList delete_node(LinkedList head, int index) {
+    if (head == NULL) {
+        return head;
+    }
+    Node *current_node = head;
+    int count = 0;
+    if (index == 0) {
+        head = head->next;
+        free(current_node);
+        return head;
+    }
+    while (current_node->next != NULL && count < index - 1) {
+        current_node = current_node->next;
+        count++;
+    }
+    if (count == index - 1 && current_node->next != NULL) {
+        Node *delete_node = current_node->next;
+        current_node->next = delete_node->next;
+        free(delete_node);
+    }
+    return head;
+}
+
+LinkedList reverse (LinkedList head) {
+    if (head == NULL) {
+        return head;
+    }
+    Node *next_node,*current_node;
+    current_node = head->next;
+    head->next = NULL;
+	while(current_node != NULL) {
+        next_node = current_node->next;
+        current_node->next = head;
+        head = current_node;
+        current_node = next_node;
+    }
+    return head;
 }
 
 void clear(LinkedList head) {
@@ -68,6 +106,10 @@ int main() {
         node->next = NULL;
         linkedlist = insert(linkedlist, node, i - 1);
     }
+    output(linkedlist);
+    linkedlist = delete_node(linkedlist, 3);
+    output(linkedlist);
+    linkedlist = reverse(linkedlist);
     output(linkedlist);
     clear(linkedlist);
     return 0;
