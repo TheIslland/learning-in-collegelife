@@ -61,13 +61,17 @@ int left_move (Vector *vector, int num) {
 void output (Vector *vector) {
     for (int i = 0; i < vector->length; i++) {
 		printf("%d", vector->data[i]);
-        if(i < vector->length - 1) {
+        if (i < vector->length - 1) {
 			printf(" ");
         }
     }
     printf("\n");
 }
 
+void clear (Vector *vector) {
+    free(vector->data);
+    free(vector);
+}
 int main () {
     int n, k;
     scanf("%d %d", &n, &k);
@@ -80,4 +84,5 @@ int main () {
         }
     left_move(vector, k);
     output(vector);
+    clear(vector);
 }
