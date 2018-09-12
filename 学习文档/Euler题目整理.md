@@ -676,27 +676,27 @@ int main() {
 
 #define MAX_N 100000
 
-int dnum[MAX_N + 5] = {0};
-int mnum[MAX_N + 5] = {0};
+int dnum[MAX_N + 5] = {0};//因子个数
+int mnum[MAX_N + 5] = {0};//最小素因子幂次
 int prime[MAX_N + 5] = {0};
 
 void init() {
     for (int i = 2; i * 2 <= MAX_N; i++) {
         if (!prime[i]) {
             prime[++prime[0]] = i;
-            dnum[i] = 2;
-            mnum[i] = 1;
+            dnum[i] = 2;//如果是素数那么其因子个数一定为２
+            mnum[i] = 1;//如果是素数那么幂次为１，因为质数不重
         }
         for (int j = 1; j <= prime[0]; j++) {
             if (i * prime[j] > MAX_N) break;
             prime[i * prime[j]] = 1;
-            if (i % prime[j] == 0) {
-                mnum[i * prime[j]] = mnum[i] + 1;
-                dnum[i * prime[j]] = dnum[i] / (mnum[i] + 1) * (mnum[i] + 2);
+            if (i % prime[j] == 0) {//如果因子互素
+                mnum[i * prime[j]] = mnum[i] + 1; //则最小幂次为合数最小幂次加一
+                dnum[i * prime[j]] = dnum[i] / (mnum[i] + 1) * (mnum[i] + 2);//则合数的因子数为合因子因子个数除合数因子最小质因子幂次加一后乘以最小幂次数加二
                 break;
-            } else {
-                mnum[i * prime[j]] = 1;
-                dnum[i * prime[j]] = dnum[i] * dnum[prime[j]];
+            } else { //如果因子互素
+                mnum[i * prime[j]] = 1;//则最小质因子幂次为１
+                dnum[i * prime[j]] = dnum[i] * dnum[prime[j]];//则此数的因字数为质因子幂次数加一后相乘
             }
         }
     }
