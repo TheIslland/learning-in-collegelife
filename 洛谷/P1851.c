@@ -32,21 +32,24 @@ void init() {
             }
         }
     }
+    for (int i = 2; i < MAX; i++) {
+        sum_factor[i] = sum_factor[i] - i;
+    }
 }
 int main() {
     init();
     int s,judg = 0;
-    //scanf("%d", &s);
-    /*for (int i = s; i < MAX; i++) {
+    scanf("%d", &s);
+    for (int i = s; i < MAX; i++) {
         for (int j = 0; j <MAX; j++) {
-            if (sum_factor[i] == j && sum_factor[j] == i) {
+            if (sum_factor[i] == j && sum_factor[j] == i && i != j) {
                 printf("%d %d\n", i, j);
                 judg = 1;
                 break;
             }
         }
         if (judg) break;
-    }*/
+    }
     while (scanf("%d", &s) != EOF) {
         printf ("%d\n", sum_factor[s]);
     }
