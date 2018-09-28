@@ -55,12 +55,16 @@ int main(int argc, char *argv[])
         if (pid == -1) printf("fork ERROR");
         if (pid == 0) {
             close(fd);
+            mkdir(inet_ntoa(client_addr.sin_addr), 0775);
             while((numbytes = recv(new_fd, buff, BUFSIZ, 0)) > 0)
             {
                 FILE *filefd;
                 char filename[100], data[4096];
                 int num = buff[0] - '0';
-                strncpy(filename, buff + 1, num);
+                char *ip = inet_ntoa(client_addr.sin_addr);
+                strcat(filename, ip);
+                filename[strlen(filename)] = '/';
+                strncpy(filename + strlen(filename), buff + 1, num);
                 strncpy(data, buff + 1 + num, strlen(buff + 1 + num));
                 filefd = fopen(filename, "a+");
                 fwrite(data, sizeof(char), strlen(data), filefd);
