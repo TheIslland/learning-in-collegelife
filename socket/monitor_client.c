@@ -17,6 +17,7 @@
 #include<unistd.h>
 #include<signal.h>
 #include<errno.h>
+#include<time.h> 
 #define MAXSIZE 4096
 
 void sys_err(const char *ptr,int num)
@@ -26,8 +27,8 @@ void sys_err(const char *ptr,int num)
 }
 
 void transport(int sockfd, char *name, char *process) {
-		char data[MAXSIZE];
-        char buf[MAXSIZE];
+		char data[MAXSIZE] = {0};
+        char buf[MAXSIZE] = {0};
         FILE *fd;
         //char process[10] = "MEM.log";
         fd = popen(process, "r");
@@ -37,11 +38,11 @@ void transport(int sockfd, char *name, char *process) {
         strncpy(buf + 1, name, t);
         strncpy(buf + 1 + strlen(name), data, strlen(data));
         send(sockfd, buf, strlen(buf), 0);
+        memset(buf, '\0', sizeof(buf));
         pclose(fd);
 }
 int main(int argc,char **argv)
  {
-    // ./a.out src
     int sockfd;
     //char buf[MAXSIZE];
     struct sockaddr_in addr;
@@ -52,19 +53,24 @@ int main(int argc,char **argv)
     if(sockfd < 0)
         sys_err("socket",-1);
 
-    bzero(&addr,sizeof(addr));
+    //bzero(&addr,sizeof(addr));
 
     //初始化ip+port
     addr.sin_family = AF_INET;
     addr.sin_port = htons(SERV_PORT);
     addr.sin_addr.s_addr = inet_addr(IP);
-
+    bzero(&(addr.sin_zero), 8);
     //connect将sockfd套接字描述符与服务器端的ip+port联系起来
     if(connect(sockfd,(struct sockaddr *)&addr,sizeof(addr)) < 0)
         sys_err("connect",-2);
+    while(1) {
+    printf("send\n");
+	transport(sockfd, "CPU.log", "./cpu_occupy.sh");
     transport(sockfd, "MEM.log", "./MEM.sh");
     transport(sockfd, "DISK.log", "./DISK.sh");
-    transport(sockfd, "CPU.log", "./cpu_occupy.sh");
+    
+    sleep(5);
+    }
     close(sockfd);
     return 0;
  }
