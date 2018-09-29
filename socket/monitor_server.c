@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in server_addr;
     struct sockaddr_in client_addr;
     char buff[10000];
-    socklen_t struct_len;
+    int struct_len;
     server_addr.sin_family = AF_INET;
     //sin.family指协议族
     server_addr.sin_port = htons(8000);
@@ -55,25 +55,29 @@ int main(int argc, char *argv[])
         if (pid == -1) printf("fork ERROR");
         if (pid == 0) {
             close(fd);
-            mkdir(inet_ntoa(client_addr.sin_addr), 0775);
+            char *ip;
+            //mkdir(inet_ntoa(client_addr.sin_addr), 0775);
             while((numbytes = recv(new_fd, buff, BUFSIZ, 0)) > 0)
             {
                 FILE *filefd;
-                char filename[100], data[4096];
+                char filename[100] = {0}, data[4096] = {0};
                 int num = buff[0] - '0';
-                char *ip = inet_ntoa(client_addr.sin_addr);
+                ip = inet_ntoa(client_addr.sin_addr);
+                mkdir(ip, 0775);
+                printf("%s %s:\n", ip, buff);
                 strcat(filename, ip);
                 filename[strlen(filename)] = '/';
-                strncpy(filename + strlen(filename), buff + 1, num);
+                strncpy(filename + 1 + strlen(ip), buff + 1, num);
                 strncpy(data, buff + 1 + num, strlen(buff + 1 + num));
                 filefd = fopen(filename, "a+");
                 fwrite(data, sizeof(char), strlen(data), filefd);
-                memset(filename, 0x00, sizeof(filename));
-                memset(data, 0x00, sizeof(data));
+                //memset(filename, '\0', sizeof(filename));
+                //memset(data, '\0', sizeof(data));
                 fclose(filefd);
+                memset(buff, '\0', sizeof(buff));
             }
-            memset(buff, 0x00, sizeof(buff));
-            printf("SUCCESS\n");
+            //memset(buff, '\0', sizeof(buff));
+            printf("%s exit\n", ip);
             exit(EXIT_SUCCESS);
         }
         else close(new_fd);
