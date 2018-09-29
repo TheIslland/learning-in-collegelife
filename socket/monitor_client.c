@@ -38,7 +38,7 @@ void transport(int sockfd, char *name, char *process) {
         strncpy(buf + 1, name, t);
         strncpy(buf + 1 + strlen(name), data, strlen(data));
         send(sockfd, buf, strlen(buf), 0);
-        memset(buf, '\0', sizeof(buf));
+        //memset(buf, '\0', sizeof(buf));
         pclose(fd);
 }
 int main(int argc,char **argv)
@@ -66,9 +66,10 @@ int main(int argc,char **argv)
     while(1) {
     printf("send\n");
 	transport(sockfd, "CPU.log", "./cpu_occupy.sh");
+    sleep(1);
     transport(sockfd, "MEM.log", "./MEM.sh");
+    sleep(1);
     transport(sockfd, "DISK.log", "./DISK.sh");
-    
     sleep(5);
     }
     close(sockfd);
