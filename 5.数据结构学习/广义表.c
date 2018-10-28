@@ -99,11 +99,12 @@ Node *build(const char *str) {
     return root;
 }
 
-void output(Node *root) {
+void output(Node *root, const char *last_output) {
     if(!root) return ;
     printf("%c ", root->key);
-    output(root->lchild);
-    output(root->rchild);
+    output(root->lchild, " ");
+    output(root->rchild, " ");
+    printf("%s", last_output);
     return ;
 }
 int main() {
@@ -111,7 +112,7 @@ int main() {
     Node *root = NULL;
     while (scanf("%[^\n]s", str) != EOF) {
         getchar();
-        output(root = build(str));
+        output(root = build(str) ,"\n");
         printf("\n");
         clearTree(root);
     }
