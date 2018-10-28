@@ -51,6 +51,7 @@ void push(Stack *s, Node *root) {
 } 
 
 Node *top(Stack *s) {
+    if (empty(s)) return NULL;
     return s->data[s->top];    
 }
 Node *getNewNode(int key) {
