@@ -39,10 +39,10 @@ int swap_node(Node **p, Node **q) {
 }
 
 Node *build_haffman(Node **arr, int n) {
-    Node INIT_NODE = {0, INT32_MAX, NULL, NULL};
+   // Node INIT_NODE = {0, INT32_MAX, NULL, NULL};
     for(int i = 0; i < n - 1 ; i++) {
-        int ind1 = arr[0]->freq > arr[1]->freq;
-        int ind2 = arr[0]->freq <= arr[1]->freq;
+    //    int ind1 = arr[0]->freq > arr[1]->freq;
+    //    int ind2 = arr[0]->freq <= arr[1]->freq;
         for(int j = 0; j < n - i - 2; j++) {
             if(arr[j]->freq <= arr[n - i - 1]->freq) {
                 swap_node (arr + j, arr + n - i - 1);
