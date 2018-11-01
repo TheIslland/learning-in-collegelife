@@ -38,15 +38,14 @@ Heap *init(int n) {
 }
 
 void push(Heap *h, Node value) {
-	if (h->cnt + 1 >= h->size) return ;
+	if (h->cnt >= h->size) return ;
     h->data[h->cnt] = value;
     int ind = h->cnt;
-    int f = (ind - 1) >> 1;
-    while (ind > 0) {
-        if(cmp(h->data[f], h->data[ind])) break;
+    int f = (ind - 1) / 2; 
+    while (cmp(h->data[ind], h->data[f])) {
 		swap(h->data[ind], h->data[f]);
         ind = f;
-        f = (ind - 1) >> 1;
+        f = (ind - 1) / 2;
     }
     h->cnt++;
     return ;
@@ -58,12 +57,12 @@ int empty(Heap *h) {
 
 void updata(Heap *h) {
 	int ind = 0;
-    int l = ind << 1 + 1;
-    int r = ind << 1 + 2;
-    while (ind < h->size) {
+    while (ind < h->cnt) {
     	int min = ind;
-    	if (l < h->size && cmp(h->data[l], h->data[min])) min = l;
-    	if (r < h->size && cmp(h->data[r], h->data[min])) min = r;
+        int l = ind * 2 + 1;
+		int r = ind * 2 + 2;
+    	if (l < h->cnt && cmp(h->data[l], h->data[min])) min = l;
+    	if (r < h->cnt && cmp(h->data[r], h->data[min])) min = r;
     	if (min == ind) break;
     	swap(h->data[min], h->data[ind]);
         ind = min;
@@ -85,6 +84,7 @@ void clear(Heap *h) {
     free(h->data);
     free(h);
 }
+
 int main() {
     int n , t;
     scanf("%d", &t);
@@ -99,18 +99,16 @@ int main() {
         }
     	while (heap->cnt) {
             Node temp;
-			if (num % 2) {
-				temp = top(heap);
-                pop(heap);
-                temp.pi = temp.pi + temp.di;
+            temp = top(heap);
+            ans = temp.pi;
+            pop(heap);
+			if (num % 2) {	
+                temp.pi += temp.di;
                 push(heap, temp);
-            } else {
-                temp = top(heap);
-				pop(heap);
             }
-			ans = temp.pi;
             num++;
         }
+        
         printf("%d\n", ans);
         clear(heap);
     }
