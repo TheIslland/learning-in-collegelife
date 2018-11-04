@@ -31,18 +31,25 @@ Node *insert(Node *root, int key) {
 }
 
 void build(Node *root) {
+    //判断当前节点是否遍历到底
     if (root == NULL) return ;
+    //线索化，引导项的建立
     static Node *pre = NULL;
+    //前序遍历
     build(root->lchild);
+    //判断当前节点左子树是否为空，为当前节点添加左线索
     if (root->lchild == NULL) {
         root->lchild = pre;
         root->ltag = THREAD;
     }
+    //判断前驱节点是否为空，前驱节点右子树是否为空，空则添加线索
     if (pre != NULL && pre->rchild == NULL) {
         pre->rchild = root;
         pre->rtag = THREAD;
     }
+    //更新前驱节点
     pre = root;
+    //前序遍历
     build(root->rchild);
     return ;
 }
