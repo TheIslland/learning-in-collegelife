@@ -9,7 +9,9 @@ int lengthOfLongestSubstring(char* s) {
     int n = strlen(s), ans = 0;
     int index[256] = {0};
     for (int j = 0, i = 0; j < n; j++) {
+        //如果遇到重复切换窗口起始点
         i = index[s[j]] > i ? index[s[j]] : i;
+        //记录值和当前值比较如果比记录值大记录
         ans = ans > j - i + 1 ? ans : j - i +1;
         index[s[j]] = j + 1;
     }
