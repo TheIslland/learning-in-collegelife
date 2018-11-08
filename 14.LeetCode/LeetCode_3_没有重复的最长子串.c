@@ -29,3 +29,29 @@ int lengthOfLongestSubstring(char *s) {
     }
     return ans;
 }
+
+//二分查找如果在序列中最终答案，长度为５不出现重复的子串０００００１１１１模型
+int check (char *s, int len) {
+    if (len == 0) return 1;
+    int num[256] = {0}, cnt = 0;
+    for (int i = 0; s[i]; i++) {
+        num[s[i]] += 1;
+        cnt += (num[s[i]] == 1);
+        if (i >= len) {
+            num[s[i - len]]--;
+            cnt -= (num[s[i - len]] == 0);
+        }
+        if (cnt == len) return 1;
+    }
+    return 0;
+}
+
+int lengthOfLongestSubstring(char *s) {
+    int head = 0, tail = strlen(s), mid;
+    while (head < tail) {
+        mid = (head + tail + 1) >> 1;
+        if (check(s, mid) == 1) head = mid;
+        else tail = mid - 1;
+    }
+    return head;
+}
