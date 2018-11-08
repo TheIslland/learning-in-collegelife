@@ -17,4 +17,15 @@ int lengthOfLongestSubstring(char* s) {
     }
     return ans;
 }
- 
+
+int lengthOfLongestSubstring(char *s) {
+    int pos[256] , len = 0;
+    memset(pos, -1, sizeof(pos));
+    for (int i = 0; s[i]; i++) {
+        len += 1;
+        if (i - pos[s[i]] < len) len = i - pos[s[i]];
+        pos[s[i]] = i;
+        if (len > ans) ans = len;
+    }
+    return ans;
+}
