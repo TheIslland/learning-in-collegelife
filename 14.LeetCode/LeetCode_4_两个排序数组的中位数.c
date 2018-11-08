@@ -33,3 +33,8 @@ double findMedianSortedArrays(int* nums1, int nums1Size, int* nums2, int nums2Si
     }
 }
 
+//二分方法，设一个数组有k1个一个数组有k2个合成数组为k = k1 + k2,分别取两个数组的中位数a1 = k1/2, a2 = k2/ 2,比较a1和a2各去掉的那一半后
+//如果为基数取最小的，为偶数取两个之和除２
+double findMedianSortedArrays(int* nums1, int nums1Size, int* nums2, int nums2Size) {
+
+}
