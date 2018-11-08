@@ -83,7 +83,7 @@ HashTable *init(int n) {
     return h;
 }
 int hashFunc(int val) {
-    return val && 0xfffffff;
+    return val & 0xfffffff;
 }
 
 void insert(HashTable *h, int val, int ind) {
