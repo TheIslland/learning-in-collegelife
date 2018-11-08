@@ -116,16 +116,16 @@ Data* search(HashTable *h, int val) {
 
  
 int *twoSum(int *nums, int numsSize, int target) {
-int *ret = (int *)malloc(sizeof(int) * 2);
-HashTable *h = init(numsSize);
-for (int i = 0; i < numsSize; i++) {
-    Data *result = search(h, target - nums[i]);
-    if (result) {
-        ret[0] = result->ind;
-        ret[1] = i;
-        break;
+    int *ret = (int *)malloc(sizeof(int) * 2);
+    HashTable *h = init(numsSize);
+    for (int i = 0; i < numsSize; i++) {
+        Data *result = search(h, target - nums[i]);
+        if (result) {
+            ret[0] = result->ind;
+            ret[1] = i;
+            break;
+        }
+        insert(h, nums[i], i);
     }
-    insert(h, nums[i], i);
-}
-return ret;
+    return ret;
 }
