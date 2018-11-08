@@ -11,8 +11,7 @@
 /**
  * Note: The returned array must be malloced, assume caller calls free().
  */
-
-int* twoSum1(int* nums, int numsSize, int target) {
+/*int* twoSum(int* nums, int numsSize, int target) {
     int *ans;
     ans = malloc(sizeof(int) * 2);
     for (int i = 0 ; i < numsSize; i++) {
@@ -25,14 +24,13 @@ int* twoSum1(int* nums, int numsSize, int target) {
         }
     } 
     return NULL;
-}
-
-#define swap(a, b) {\
+}*/
+/*#define swap(a, b) {\
     __typeof(a) _temp = (a); (a) = (b); (b) = _temp;\
 }
 void quick_sort(int *num, int l, int r) {
     if (r <= l) return ;
-    int x  l, y = r, z;
+    int x = l, y = r, z;
     swap(num[l], num[(l + r) >> 1]);
     z = num[l];
     while (x < y) {
@@ -46,11 +44,11 @@ void quick_sort(int *num, int l, int r) {
     quick_sort(num, x + 1, r);
     return ;
 }
-int *twoSum2(int *nums, int numsSize, int target) {
+int *twoSum(int *nums, int numsSize, int target) {
     int *temp_num = (int *)malloc(sizeof(int) * (numsSize));
     memcpy(temp_num, nums, sizeof(int) * (numsSize));
-    quick_sort(nums, 0 numsSize - 1);
-    itn p = 0, q = numsSize - 1;
+    quick_sort(nums, 0, numsSize - 1);
+    int p = 0, q = numsSize - 1;
     while (nums[p] + nums[q] != target) {
         if (nums[p] + nums[q] < target) ++p;
         else --q;
@@ -65,8 +63,69 @@ int *twoSum2(int *nums, int numsSize, int target) {
     }
     return ret;
 }
+*/
 
-int main() {
+typedef struct Data {
+    int val, ind;
+} Data;
+
+typedef struct HashTable {
+    Data *data;
+    int *flag;
+    int size;
+} HashTable;
+
+HashTable *init(int n) {
+    HashTable *h = (HashTable *)malloc(sizeof(HashTable));
+    h->size = n << 1;
+    h->data = (Data *)malloc(sizeof(Data) * h->size);
+    h->flag = (int *)calloc(sizeof(int), h->size);
+    return h;
+}
+int hashFunc(int val) {
+    return val && 0xfffffff;
+}
+
+void insert(HashTable *h, int val, int ind) {
+    int hash = hashFunc(val);
+    int pos = hash % h->size;
+    int times = 1;
+    while (h->flag[pos]) {
+        pos += (times * times);
+        times++;
+        pos %= h->size;
+    }
+    h->data[pos].val = val;
+    h->data[pos].ind = ind;
+    h->flag[pos] = 1;
+    return ;
+}
+
+Data* search(HashTable *h, int val) {
+    int hash = hashFunc(val);
+    int pos = hash % h->size;
+    int times = 1;
+    while (h->flag[pos] && h->data[pos].val != val) {
+        pos += (times * times);
+        times++;
+        pos %= h->size;
+    }
+    if (h->flag[pos] == 0) return NULL;
+    return h->data + pos;
+}
+
  
-return 0;
+int *twoSum(int *nums, int numsSize, int target) {
+int *ret = (int *)malloc(sizeof(int) * 2);
+HashTable *h = init(numsSize);
+for (int i = 0; i < numsSize; i++) {
+    Data *result = search(h, target - nums[i]);
+    if (result) {
+        ret[0] = result->ind;
+        ret[1] = i;
+        break;
+    }
+    insert(h, nums[i], i);
+}
+return ret;
 }
