@@ -2,9 +2,8 @@
 	> File Name: master.c
 	> Author:TheIslland 
 	> Mail: 861436930@qq.com
-	> Created Time: 2018年11月13日 星期二 19时39分18秒
+	> Created Time: 2018年11月20日 星期二 17时49分23秒
  ************************************************************************/
-
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -19,9 +18,29 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <sys/shm.h>
 #include <errno.h>
-#include "shm.h"
+#include <pthread.h>
+
+struct rdwr_lock {
+    pthread_mutex_t mutex;
+    pthread_cond_t can_read;
+    pthread_cond_t can_write;
+    int reader_number;
+    int writer_number;
+    int waiting_readers;
+    int waiting_writers;
+};
+
+void acquire_read_lock(struct rdwr_lock *lock){
+    pthread_mutex_lock(&lock->mutex);
+    while (lock->writer_number + lock->waiting_writers > 0) {
+        lock->waiting_readers += 1;
+        pthread_cond_wait(&lock->can_read, lock);
+        lock->waiting_readers -= 1;
+    }
+    lock->reader_number += 1;
+    pthread_mutex_unlock(&lock->mutex);
+}
 
 typedef struct Node {
     char *IP;
@@ -29,8 +48,11 @@ typedef struct Node {
 } Node;
 
 typedef struct Queue {
-    int head, length, tail, cnt;
+    int head, length, tail, cnt, flag;
     Node **data;
+    pthread_mutex_t  mutex;
+    pthread_cond_t is_full;
+    pthread_cond_t is_empty;
 } Queue;
 
 Node *getNode (char *ip, int port) {
@@ -47,15 +69,25 @@ Queue *init (int n) {
     q->cnt = 0;
     q->head = 0;
     q->tail = -1;
+    q->flag = 0;
+    pthread_mutex_init(&q->mutex, NULL);
+    pthread_cond_init(&q->is_full, NULL);
+    pthread_cond_init(&q->is_empty, NULL);
     return q;
 }
 
 int push (Queue *q, char *ip, int port) {
+    if (pthread_mutex_lock(&q->mutex) != 0) {
+        return -1;       
+    }
     if (q->cnt == q->length) return 0;
     q->tail += 1;
     if (q->tail >= q->length) q->tail -= q->length;
     q->cnt += 1;
     q->data[q->tail] = getNode(ip, port);
+    if (pthread_mutex_unlock(&q->mutex) != 0) {
+		return -1;
+    }
     return 1;
 }
 
@@ -63,17 +95,34 @@ int empty (Queue *q) {
     return q->cnt == 0;
 }
 
+int run (Queue *q) {
+    return q->flag;
+}
+
 void pop (Queue *q) {
+    if (pthread_mutex_lock(&q->mutex) != 0) {
+		return (void )-1;
+    }
     if (empty(q)) return;
     q->head += 1;
     if (q->head >= q->length) q->head -= q->length;
     q->cnt -= 1;
+    if (pthread_mutex_unlock(&q->mutex) != 0) {
+		return (void )-1;
+    }
     return ;
 }
 
 Node *front (Queue *q) {
+    if (pthread_mutex_lock(&q->mutex) != 0) {
+		return (Node *)-1;
+    }
     if (empty(q)) return 0;
-    return q->data[q->head];
+    Node *ret = q->data[q->head];
+    if (pthread_mutex_unlock(&q->mutex) != 0) {
+		return (Node *)-1;
+    }
+    return ret;
 }
 
 /*void clear (Queue *q) {
@@ -128,15 +177,8 @@ int main(int argc, char *argv[])
     printf("Listening....\n");
     printf("Ready for Accept,Waitting...\n");
     pid_t pid, pid1, pid2, pid3, pid4;
-    printf("建立５个对应５个进程的队列\n");
+    printf("建立５个对应５个线程的队列\n");
     int num = 0, onli, q = -1;
-    int shmid = creat_shm(1000);
-    Queue *buf = NULL;
-    for (int i = 0; i < 5; i++) {
-        q++;
-        pid = fork();
-        buf = (Queue *)shmat(shmid, NULL, 0);
-    }
     while (1) {
     	new_fd = accept(fd, (struct sockaddr *)&client_addr, &struct_len);
         //接收连接请求，成功返回客户端的文件描述符，失败返回－１
@@ -144,6 +186,7 @@ int main(int argc, char *argv[])
         printf("Get the client num is %d:\n", num);
         numbytes = send(new_fd,"Welcome to my server\n",21,0); 
         printf("新增连接按序号入队");
+        //如果是父进程执行入队操作
         if (pid != 0) {
             int stat = num % 5;
             char *ip = inet_ntoa(client_addr.sin_addr);
@@ -171,9 +214,12 @@ int main(int argc, char *argv[])
                 } break;
             }
         } else {
+            //子进程相应进程从相应队列取ｉｐ连接
             switch (q) {
                 case 0: {
+                    if (!run(queue[0]) && !empty(queue[0])) {
                         
+                    }   
                 } break;
                 case 1: {
 
