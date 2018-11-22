@@ -31,20 +31,57 @@ struct rdwr_lock {
     int waiting_writers;
 };
 
+struct rdwr_lock rd_lock;
+struct rdwr_lock wr_lock;
+
+//读取锁
 void acquire_read_lock(struct rdwr_lock *lock){
     pthread_mutex_lock(&lock->mutex);
     while (lock->writer_number + lock->waiting_writers > 0) {
         lock->waiting_readers += 1;
-        pthread_cond_wait(&lock->can_read, lock);
+        pthread_cond_wait(&lock->can_read, &lock->mutex);
         lock->waiting_readers -= 1;
     }
     lock->reader_number += 1;
     pthread_mutex_unlock(&lock->mutex);
 }
+//写入锁
+void acquire_write_lock(struct rdwr_lock *lock){
+    pthread_mutex_lock(&lock->mutex);
+    while (lock->writer_number + lock->reader_number > 0) {
+        lock->waiting_writers += 1;
+        pthread_cond_wait(&lock->can_write, &lock->mutex);
+        lock->waiting_writers -= 1;
+    }
+    lock->writer_number += 1;
+    pthread_mutex_unlock(&lock->mutex);
+}
+//解读取锁
+void unlock_write_lock(struct rdwr_lock *lock){
+    pthread_mutex_lock(&lock->mutex);
+    lock->writer_number -= 1;
+    if (lock->waiting_writers > 0) {
+        pthread_cond_signal(&lock->can_write);
+    } else if (lock->waiting_readers > 0) {
+        pthread_cond_broadcast(&lock->can_read);
+    }
+    pthread_mutex_unlock(&lock->mutex);
+}
+//解写入锁
+void unlock_read_lock(struct rdwr_lock *lock){
+    pthread_mutex_lock(&lock->mutex);
+    lock->reader_number -= 1;
+    if (lock->waiting_writers>0) {
+        pthread_cond_signal(&lock->can_write);
+    } else if (lock->waiting_readers > 0) {
+        pthread_cond_broadcast(&lock->can_read);
+    }
+    pthread_mutex_unlock(&lock->mutex);
+}
 
 typedef struct Node {
     char *IP;
-    char port;
+    int port;
 } Node;
 
 typedef struct Queue {
@@ -77,17 +114,17 @@ Queue *init (int n) {
 }
 
 int push (Queue *q, char *ip, int port) {
-    if (pthread_mutex_lock(&q->mutex) != 0) {
+   /* if (pthread_mutex_lock(&q->mutex) != 0) {
         return -1;       
-    }
+    }*/
     if (q->cnt == q->length) return 0;
     q->tail += 1;
     if (q->tail >= q->length) q->tail -= q->length;
     q->cnt += 1;
     q->data[q->tail] = getNode(ip, port);
-    if (pthread_mutex_unlock(&q->mutex) != 0) {
+   /* if (pthread_mutex_unlock(&q->mutex) != 0) {
 		return -1;
-    }
+    }*/
     return 1;
 }
 
@@ -100,28 +137,29 @@ int run (Queue *q) {
 }
 
 void pop (Queue *q) {
-    if (pthread_mutex_lock(&q->mutex) != 0) {
+    /*if (pthread_mutex_lock(&q->mutex) != 0) {
 		return (void )-1;
-    }
+    }*/
     if (empty(q)) return;
     q->head += 1;
     if (q->head >= q->length) q->head -= q->length;
     q->cnt -= 1;
-    if (pthread_mutex_unlock(&q->mutex) != 0) {
+    /*if (pthread_mutex_unlock(&q->mutex) != 0) {
 		return (void )-1;
-    }
+    }*/
     return ;
 }
 
+
 Node *front (Queue *q) {
-    if (pthread_mutex_lock(&q->mutex) != 0) {
+    /*if (pthread_mutex_lock(&q->mutex) != 0) {
 		return (Node *)-1;
-    }
+    }*/
     if (empty(q)) return 0;
     Node *ret = q->data[q->head];
-    if (pthread_mutex_unlock(&q->mutex) != 0) {
+   /* if (pthread_mutex_unlock(&q->mutex) != 0) {
 		return (Node *)-1;
-    }
+    }*/
     return ret;
 }
 
@@ -144,13 +182,32 @@ void output (Queue *q) {
     return ;
 }
 
+void *func(void *arg) {
+    while (1) {
+    Queue *q = (Queue *)arg;
+    while (empty(q)) { 
+        printf("1\n");
+        pthread_cond_wait(&q->is_empty, &q->mutex); 
+        printf("end\n");
+    }
+    acquire_read_lock(&rd_lock);
+    if (empty(q)) continue;
+    Node *temp = front(q);
+    pop(q);
+    if (empty(q)) printf("empty\n");
+    printf("ip = %s port = %d\n", temp->IP, temp->port);
+    unlock_read_lock(&rd_lock);
+    long long ans = pthread_self();
+    printf("线程　%lld", ans);
+    output(q);
+    sleep(2);
+    }
+}
+
 int main(int argc, char *argv[])
 {
 
-    Queue *queue[5];
-    for (int i = 0; i < 5; i++) {
-        queue[i] = init(1000);    
-    }
+    Queue *queue = init(1000);    
     int fd, new_fd, numbytes,i;
     struct sockaddr_in server_addr;
     struct sockaddr_in client_addr;
@@ -177,8 +234,12 @@ int main(int argc, char *argv[])
     printf("Listening....\n");
     printf("Ready for Accept,Waitting...\n");
     pid_t pid, pid1, pid2, pid3, pid4;
-    printf("建立５个对应５个线程的队列\n");
+    printf("建立５个线程\n");
     int num = 0, onli, q = -1;
+    pthread_t t[5];
+    for (int i = 0; i < 2; i++) {
+        pthread_create(&t[i], NULL, func, (void *)queue);
+    }
     while (1) {
     	new_fd = accept(fd, (struct sockaddr *)&client_addr, &struct_len);
         //接收连接请求，成功返回客户端的文件描述符，失败返回－１
@@ -186,59 +247,18 @@ int main(int argc, char *argv[])
         printf("Get the client num is %d:\n", num);
         numbytes = send(new_fd,"Welcome to my server\n",21,0); 
         printf("新增连接按序号入队");
-        //如果是父进程执行入队操作
-        if (pid != 0) {
-            int stat = num % 5;
-            char *ip = inet_ntoa(client_addr.sin_addr);
-            int port = htons(client_addr.sin_port);
-            switch (stat) {
-                case 0: {
-                    printf("入进程０队列\n");
-                    push(queue[0], ip, port); 
-                } break;
-                case 1: {
-                    printf("入进程１队列\n");
-                    push(queue[1], ip, port);
-                } break;
-                case 2: {
-                    printf("入进程２队列\n");
-                    push(queue[2], ip, port);
-                } break;
-                case 3: {
-                    printf("入进程３队列\n");
-                    push(queue[3], ip, port);
-                } break;
-                case 4: {
-                    printf("入进程４队列\n");
-                    push(queue[4], ip, port);
-                } break;
-            }
-        } else {
-            //子进程相应进程从相应队列取ｉｐ连接
-            switch (q) {
-                case 0: {
-                    if (!run(queue[0]) && !empty(queue[0])) {
-                        
-                    }   
-                } break;
-                case 1: {
-
-                } break;
-                case 2: {
-
-                } break;
-                case 3: {
-                    
-                } break;
-                case 4: {
-
-                } break;
-            }
-        }
-        //printf("动态分配用户, 将第i户分配到对长较小队列\n");
-        //printf("对应入队\n");
-        //printf("当对应队列不为空时顺序出队执行，执行后出队\n");
-        //printf("当队列为空时结束循环结束进程\n");
-	}
-        return 0;
+        //有新连接就进入队列
+        char *ip = inet_ntoa(client_addr.sin_addr);
+        int port = htons(client_addr.sin_port);
+        acquire_write_lock(&wr_lock);
+        push(queue, ip, port);
+        Node *ans = front(queue);
+        pthread_cond_signal(&queue->is_empty);
+        //printf("push ip = %s port = %d\n", ans->IP, ans->port);
+        //printf("signal \n");
+        unlock_write_lock(&wr_lock);
+        //开５个线程不关，队列空就阻塞，队列不空就提取出队
+    }
+    close(fd);
+    return 0;
 }
