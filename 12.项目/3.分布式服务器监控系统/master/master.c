@@ -4,6 +4,7 @@
 	> Mail: 861436930@qq.com
 	> Created Time: 2018年11月20日 星期二 17时49分23秒
  ************************************************************************/
+
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -20,6 +21,86 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <pthread.h>
+
+typedef struct H_Node {
+    char *ip;
+    int flag;
+    struct H_Node *next;
+}H_Node;
+
+typedef struct Hashtable {
+    H_Node **data;
+    int size;
+    pthread_mutex_t mutex;    
+} Hashtable;
+
+H_Node *init_H_Node (char *str, H_Node *head) {
+    H_Node *node = (H_Node *)malloc(sizeof(H_Node));
+    node->ip = strdup(str);
+    node->flag = 1;
+    node->next = head;
+    return node;
+}
+
+Hashtable *init_hashtable (int n) {
+    Hashtable *h = (Hashtable *)malloc(sizeof(Hashtable));
+    h->size = n << 1;
+    h->data = (H_Node **)calloc(sizeof(H_Node *), h->size);
+    return h;
+}
+
+unsigned int APHash(char *str) {
+    unsigned int hash = 0;
+    int i;  
+    for(i = 0; *str; i++) {
+        if((i & 1) == 0) {
+            hash ^= ((hash << 7) ^ (*str++) ^ (hash >> 3));
+        }
+        else {
+            hash ^= (~((hash << 11) ^ (*str++) ^ (hash >> 5)));
+        }
+    }      
+    return hash;
+}
+
+int Hashtable_insert (Hashtable *h, char *str) {
+    unsigned int hash = APHash(str);
+    unsigned int ind = hash % h->size;
+    H_Node *p = h->data[ind];
+    while (p && strcmp(p->ip, str)) p = p->next;
+    if (p != NULL && p->flag == 1) return 0;
+    h->data[ind] = init_H_Node(str, h->data[ind]);
+    return 1;
+}
+
+void change_Hashtable (Hashtable *h, char *str) {
+    unsigned int hash = APHash(str);
+    unsigned int ind = hash % h->size;
+    H_Node *p = h->data[ind];    
+    while (p && strcmp(p->ip, str)) p = p->next;
+    if (p != NULL) p->flag = 0;
+    return ;
+}
+
+void clear_node(H_Node *node) {
+    if (!node) return ;
+    H_Node *p = node, *q;
+    while (p) {
+        q = p->next;
+        free(p->ip);
+        free(p);
+        p = q;
+    }
+    return ;
+}
+
+void clear_hashtable(Hashtable *h) {
+    if (!h) return ;
+    for (int i = 0; i < h->size; i++) clear_node(h->data[i]);
+    free(h->data);
+    free(h);
+    return ;
+}
 
 typedef struct Node {
     char *IP;
@@ -133,25 +214,70 @@ void output (Queue *q) {
     return ;
 }
 
+typedef struct Var {
+    Hashtable *h;
+    Queue *q;
+} Var;
+
+int get_IP(char *filename, int cnt, char *v) {
+    FILE *fd = fopen(filename, "r");
+    size_t len = 0;
+    ssize_t read;
+    char *line = NULL;
+    int i = 0;
+    while ((read = getline(&line, &len, fd)) != -1) {
+        if (i == cnt) {
+            strncpy(v, line, strlen(line) - 1);
+        }
+        i++;
+    }
+    free(line);
+    fclose(fd);
+    return 0;
+}
+
+int soc_con(char *IP, int port) {
+    struct sockaddr_in server_addr;
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0); // 创建一个socket
+    if (sockfd < 0) return -1;
+    server_addr.sin_family = AF_INET; // 初始化服务器地址
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = inet_addr(IP);
+    bzero(&(server_addr.sin_zero), 8);
+    int k = connect(sockfd, (struct sockaddr*)&server_addr, sizeof(struct sockaddr));
+    if (k < 0) return -1;
+    return sockfd;
+}
+
 void *func(void *arg) {
     while (1) {
-    Queue *q = (Queue *)arg;
-    if (empty(q)) continue;
-    Node *temp = pop(q);
-    if (empty(q)) printf("empty\n");
-    printf("ip = %s port = %d\n", temp->IP, temp->port);
-    long long ans = pthread_self();
-    printf("线程　%lld", ans);
-    output(q);
-    sleep(2);
+        Var *var = (Var *)arg;
+        Queue *q = var->q;
+        Hashtable *h = var->h;
+        if (empty(q)) {
+            sleep(2);
+            continue;
+        }
+        Node *temp = pop(q);
+        while (1) {
+        	int sockfd = soc_con(temp->IP, temp->port);
+            if (sockfd < 0) {
+                printf("IP = %s 的机器并不在线ＱＷＱ\n", temp->IP);
+                break;
+            }
+        	long long ans = pthread_self();
+        	printf("线程　:%lld", ans);
+        	printf("ip = %s port = %d\n", temp->IP, temp->port);
+        	change_Hashtable(h, temp->IP);
+        	printf("线程　:%lld", ans);
+        	output(q);
+        	printf("\n");
+        	sleep(5);
+		}
     }
 }
 
-void 
-
-int main(int argc, char *argv[])
-{
-
+int main(int argc, char *argv[]) {
     Queue *queue = init(1000);    
     int fd, new_fd, numbytes,i;
     struct sockaddr_in server_addr;
@@ -181,9 +307,22 @@ int main(int argc, char *argv[])
     pid_t pid, pid1, pid2, pid3, pid4;
     printf("建立５个线程\n");
     int num = 0, onli, q = -1;
-    pthread_t t[5];
+    Hashtable *hashtable = init_hashtable(2000);
+    for (int i = 0; i < 5; i++) {
+        char temp_IP[100] = {0};
+        char temp_port[4] = {0};
+        get_IP("IP.conf", i, temp_IP);
+        get_IP("PORT.conf", i, temp_port);
+        if (Hashtable_insert(hashtable, temp_IP)) {
+            push(queue, temp_IP, atoi(temp_port));
+        }
+    }
+	Var *var = (Var *)malloc(sizeof(Var));
+    var->h = hashtable;
+    var->q = queue;
+	pthread_t t[5];
     for (int i = 0; i < 2; i++) {
-        pthread_create(&t[i], NULL, func, (void *)queue);
+        pthread_create(&t[i], NULL, func, (void *)var);
     }
     while (1) {
     	new_fd = accept(fd, (struct sockaddr *)&client_addr, &struct_len);
@@ -195,7 +334,9 @@ int main(int argc, char *argv[])
         //有新连接就进入队列
         char *ip = inet_ntoa(client_addr.sin_addr);
         int port = htons(client_addr.sin_port);
-        push(queue, ip, port);
+        if (Hashtable_insert(hashtable, ip)) {
+            push(queue, ip, port);
+        }
         //开５个线程不关，队列空就阻塞，队列不空就提取出队
     }
     close(fd);
