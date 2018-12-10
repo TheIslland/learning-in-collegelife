@@ -22,6 +22,8 @@
 #include <errno.h>
 #include <pthread.h>
 
+#define BUFSIZE 1000
+
 typedef struct H_Node {
     char *ip;
     int flag;
@@ -259,12 +261,31 @@ void *func(void *arg) {
             continue;
         }
         Node *temp = pop(q);
-        while (1) {
-        	int sockfd = soc_con(temp->IP, temp->port);
-            if (sockfd < 0) {
-                printf("IP = %s 的机器并不在线ＱＷＱ\n", temp->IP);
-                break;
-            }
+        int con_fd = soc_con(temp->IP, temp->port);
+        if (con_fd < 0) {
+        	change_Hashtable(h, temp->IP);
+            continue;
+        }
+		char IP[100];
+        int port, numbytes;
+        char buff[BUFSIZE] = {0};
+        strcpy(IP, temp->IP); 
+        port = temp->port;
+        printf("wait\n");
+        while((numbytes = recv(con_fd, buff, BUFSIZE, 0)) > 0) { // 接收数据
+            char filename[200] = {0}, data[BUFSIZE] = {0};
+            int t = buff[0] - '0', k = strlen(IP);
+            mkdir(IP, 0775); // 同linux mkdir建立目录后的权限一致
+            strncpy(filename, IP, k);
+            filename[k] = '/';
+            strncpy(filename + 1 + k, buff + 1, t);
+            strncpy(data, buff + 1 + t, strlen(buff + 1 + t));
+            FILE *fd;
+            fd = fopen(filename, "a+");
+            fwrite(data, sizeof(char), strlen(data), fd);
+            fclose(fd);
+            memset(buff, 0, sizeof(buff));
+        }    
         	long long ans = pthread_self();
         	printf("线程　:%lld", ans);
         	printf("ip = %s port = %d\n", temp->IP, temp->port);
@@ -273,7 +294,6 @@ void *func(void *arg) {
         	output(q);
         	printf("\n");
         	sleep(5);
-		}
     }
 }
 
@@ -333,9 +353,10 @@ int main(int argc, char *argv[]) {
         printf("新增连接按序号入队");
         //有新连接就进入队列
         char *ip = inet_ntoa(client_addr.sin_addr);
-        int port = htons(client_addr.sin_port);
+        int port = 8432;
         if (Hashtable_insert(hashtable, ip)) {
             push(queue, ip, port);
+            printf("push Success!\n");
         }
         //开５个线程不关，队列空就阻塞，队列不空就提取出队
     }
