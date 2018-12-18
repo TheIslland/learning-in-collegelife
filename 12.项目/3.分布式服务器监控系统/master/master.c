@@ -284,8 +284,11 @@ void *func1(void *arg) {
             strncpy(filename + 1 + k, buff + 1, t);
             strncpy(data, buff + 1 + t, strlen(buff + 1 + t));*/
             FILE *fd;
+            strncpy(data, IP, strlen(IP));
+            strncpy(data + strlen(IP), ":\n", 2);
+            strncpy(data + 2 + strlen(IP), buff, strlen(buff));
             fd = fopen("client_warn_information", "a+");
-            fwrite(buff, sizeof(char), strlen(buff), fd);
+            fwrite(data, sizeof(char), strlen(data), fd);
             fclose(fd);
             memset(buff, 0, sizeof(buff));
         }    
