@@ -251,27 +251,74 @@ int soc_con(char *IP, int port) {
     return sockfd;
 }
 
+void *func1(void *arg) {
+    int warn, new_warn, struct_len;
+    struct sockaddr_in warn_addr;
+    struct sockaddr_in connect_warn;
+    char buff[10000];
+    warn_addr.sin_family = AF_INET;
+    //sin.family指协议族
+    warn_addr.sin_port = htons(8536);
+    //sin.port存储端口号
+    warn_addr.sin_addr.s_addr = INADDR_ANY;
+    //按照网络字节顺序存储ｉｐ地址
+    bzero(&(warn_addr.sin_zero), 8);
+    //为了让sockeaddr和sockaddr_in两个数据保持大小相同而保留空字节
+    struct_len = sizeof(struct sockaddr_in);
+    //获取sockaddr缓冲区长度
+    warn = socket(AF_INET, SOCK_STREAM, 0);
+    //socket函数创建新的套接字，如果创建成功就返回新创建的套接字描述符失败会返回－１
+    while(bind(warn, (struct sockaddr *)&warn_addr, struct_len) == -1);
+    //如果绑定成功返回０不成功返回－１无限循环
+    printf("warn Bind Success!\n");
+    while(listen(warn, 10) == -1);
+    while (1) {
+        int numbytes;
+    	new_warn = accept(warn, (struct sockaddr *)&connect_warn, &struct_len);
+        char *IP = inet_ntoa(connect_warn.sin_addr);
+        if ((numbytes = recv(new_warn, buff, BUFSIZE, 0)) > 0) { // 接收数据
+            char filename[200] = {0}, data[BUFSIZE] = {0};
+            /*int t = buff[0] - '0', k = strlen(IP);
+            strncpy(filename, IP, k);
+            filename[k] = '/';
+            strncpy(filename + 1 + k, buff + 1, t);
+            strncpy(data, buff + 1 + t, strlen(buff + 1 + t));*/
+            FILE *fd;
+            fd = fopen("client_warn_information", "a+");
+            fwrite(buff, sizeof(char), strlen(buff), fd);
+            fclose(fd);
+            memset(buff, 0, sizeof(buff));
+        }    
+    }
+    sleep(2);
+}
+
 void *func(void *arg) {
     while (1) {
         Var *var = (Var *)arg;
         Queue *q = var->q;
         Hashtable *h = var->h;
+        printf("wait, because queue is empty\n");
         if (empty(q)) {
             sleep(2);
             continue;
         }
+        printf("queue is not empty\n");
         Node *temp = pop(q);
         int con_fd = soc_con(temp->IP, temp->port);
         if (con_fd < 0) {
         	change_Hashtable(h, temp->IP);
+            printf("Device --> ip = %s  is not online, change IP state\n", temp->IP);
             continue;
+        } else {
+            printf("Device --> ip = %s online, start connect...\n", temp->IP);
         }
 		char IP[100];
         int port, numbytes;
         char buff[BUFSIZE] = {0};
         strcpy(IP, temp->IP); 
         port = temp->port;
-        printf("wait\n");
+        printf("connect IP = %s...\n", temp->IP);
         while((numbytes = recv(con_fd, buff, BUFSIZE, 0)) > 0) { // 接收数据
             char filename[200] = {0}, data[BUFSIZE] = {0};
             int t = buff[0] - '0', k = strlen(IP);
@@ -286,6 +333,7 @@ void *func(void *arg) {
             fclose(fd);
             memset(buff, 0, sizeof(buff));
         }    
+        printf("Link ans related operation completed\n");
         	long long ans = pthread_self();
         	printf("线程　:%lld", ans);
         	printf("ip = %s port = %d\n", temp->IP, temp->port);
@@ -340,7 +388,10 @@ int main(int argc, char *argv[]) {
 	Var *var = (Var *)malloc(sizeof(Var));
     var->h = hashtable;
     var->q = queue;
+    int local_port[1] = {8536}; 
 	pthread_t t[5];
+    pthread_t w;
+    pthread_create(&w, NULL, func1, (void *)local_port );
     for (int i = 0; i < 2; i++) {
         pthread_create(&t[i], NULL, func, (void *)var);
     }
@@ -356,7 +407,9 @@ int main(int argc, char *argv[]) {
         int port = 8432;
         if (Hashtable_insert(hashtable, ip)) {
             push(queue, ip, port);
-            printf("push Success!\n");
+            printf("ip:%s push Success!\n", ip);
+        } else {
+            printf("ip:%s already push into the  queue!\n", ip);
         }
         //开５个线程不关，队列空就阻塞，队列不空就提取出队
     }
