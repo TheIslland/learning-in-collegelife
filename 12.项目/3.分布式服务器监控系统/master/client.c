@@ -16,6 +16,8 @@
 #include <pthread.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 void func(char *str, char *m, int sockfd) {
     char buf[BUFSIZ] = {0};
@@ -30,10 +32,48 @@ void func(char *str, char *m, int sockfd) {
     return ;
 }
 
+void func_w(char *m, int sockfd) {
+    char buf[BUFSIZ] = {0};
+    char data[1000] = {0};
+    FILE *fp = popen(m, "r");
+    fread(data, sizeof(char), sizeof(data), fp);
+    strncpy(buf, data, strlen(data));
+    while (send(sockfd, buf, strlen(buf), 0) < -1);
+    pclose(fp);
+    return ;
+    
+}
+
+char *IP_acquire() {
+    char hname[128];
+    struct hostent *hent;
+    int i;
+    hent = gethostbyname(hname);
+    char *ip = inet_ntoa(*(struct in_addr*)(hent->h_addr_list[i]));
+    return ip;
+}
+
+void *func1(void *argv) {
+    struct sockaddr_in server;
+    server.sin_family = AF_INET; // 初始化服务器地址
+    server.sin_port = htons(8536);
+    server.sin_addr.s_addr = inet_addr("192.168.2.163");
+    bzero(&(server.sin_zero), 8);
+    int fd;
+    while ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1); // socket
+    while (1) {
+      while (connect(fd, (struct sockaddr*)&server, sizeof(struct sockaddr)) == -1);
+        func_w("./warning_monitoring.sh", fd);        
+        if (fd != -1) close(fd);
+        printf("cds\n");
+        sleep(10);
+    }
+}
+
 void *soc_func(void *argv) {
     struct sockaddr_in server;
     server.sin_family = AF_INET; // 初始化服务器地址
-    server.sin_port = htons(8765);
+    server.sin_port = htons(8432);
     server.sin_addr.s_addr = inet_addr("192.168.2.163");
     bzero(&(server.sin_zero), 8);
     int fd;
@@ -63,12 +103,11 @@ int main(int argc, char *argv[]) {
     server_addr.sin_port = htons(8432); // 端口
     server_addr.sin_addr.s_addr = INADDR_ANY;
     bzero(&(server_addr.sin_zero), 8); // 地址族协议
-    struct_len = sizeof(struct sockaddr_in);
-    
+    struct_len = sizeof(struct sockaddr_in); 
     struct sockaddr_in *ser = &server_addr;
-    pthread_t t;
+    pthread_t t, w;
+    pthread_create(&w, NULL, func1, NULL);
     pthread_create(&t, NULL, soc_func, NULL);
-
     fd = socket(AF_INET, SOCK_STREAM, 0); // socket
     while(bind(fd, (struct sockaddr *)&server_addr, struct_len) == -1); // bind 绑定
     printf("绑定成功\n");
