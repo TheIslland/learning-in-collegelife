@@ -13,10 +13,13 @@
 
 int main() {
     #define MAX_OP 2018
+    int n;
     srand (time (0));
     Queue *q_man = init(MAX_OP);
     Queue *q_woman = init(MAX_OP);
-    while (1) {
+    printf("请输入舞曲轮数\n");
+    scanf("%d", &n);
+    while (n--) {
         for (int i = 0; i < 20; i++) {
             int op = rand() % 4, value = rand () % 100;
             switch (op) {
