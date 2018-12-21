@@ -20,9 +20,8 @@ int main() {
     #define MAX_OP 2018
     int n;
     srand (time (0));
-    Queue_operation q;
-    Queue *q_man = q.init(MAX_OP);
-    Queue *q_woman = q.init(MAX_OP);
+    Queue q_man(MAX_OP);
+    Queue q_woman(MAX_OP);
     printf("请输入舞曲轮数\n");
     scanf("%d", &n);
     while (n--) {
@@ -31,38 +30,38 @@ int main() {
             switch (op) {
                 case 0: break;
                 case 1:
-                    q.push (q_man, value);
+                    q_man.push (value);
                     printf("push %d to man queue\n", value);
-                    q.output(q_man);
+                    q_man.output();
                     break;
                 case 2:
-                    q.push (q_woman, value);
+                    q_woman.push (value);
                     printf("push %d to woman queue\n", value);
-                    q.output(q_woman);
+                    q_woman.output();
                     break;
             }
         }
-        while (!q.empty(q_man) && !q.empty(q_woman)) {
-            int man = q.front(q_man);
-            int woman = q.front(q_woman);
+        while (!q_man.empty() && !q_woman.empty()) {
+            int man = q_man.front();
+            int woman = q_woman.front();
             printf("男士 %d 与 女士 %d 舞伴配对成功\n", man, woman);
-            q.pop(q_man);
-            q.pop(q_woman);
+            q_man.pop();
+            q_woman.pop();
         }
         printf("\n");
-        if (q.empty(q_man)) printf("男士完全配对\n");
+        if (q_man.empty()) printf("男士完全配对\n");
         else {
             printf("配对后男士剩余：");
-            q.output(q_man);
+            q_man.output();
         }
-        if (q.empty(q_woman)) printf("女士完全配对\n");
+        if (q_woman.empty()) printf("女士完全配对\n");
         else {
             printf("配对后女士剩余：");
-            q.output(q_woman);
+            q_woman.output();
         }
         sleep(5);
     }
-    q.clear(q_woman);
-    q.clear(q_man);
+    q_woman.clear();
+    q_man.clear();
     return 0;
 }
