@@ -7,8 +7,34 @@
 
 #ifndef _SORT_H
 #define _SORT_H
+#include <cassert>
+#include <iostream>
+#define MAX_N 20
+#define TEST_TIME(funs) ({\
+    int begin = clock();\
+    double ret = funs;\
+    int end = clock();\
+    printf("%lfms\n", (end - begin) * 1.0 / CLOCKS_PER_SEC * 1000);\
+    ret;\
+})
+
+#define TEST(arr, n, func, args...) {\
+    int *num = (int *)malloc(sizeof(int) * n);\
+    memcpy(num, arr, sizeof(int) * n);\
+    output(num, n);\
+    printf("%s = ", #func);\
+    func(args);\
+    output(num, n);\
+    free(num);\
+}
+
 #define swap(a,b) {\
     __typeof(a) _temp = a; a = b; b = _temp;\
+}
+
+void rand_num(int *num, int n) {
+    while(n--) num[n] = rand() % 321;
+    return ;
 }
 
 void output(int *num, int n) {
@@ -21,7 +47,18 @@ void output(int *num, int n) {
     return ;
 }
 
-double bubble_sort(int *num, int n) {
+class Sort{
+public:
+    double bubble_sort(int *num, int n);
+    double heap_sort(int *arr, int n);
+    double hill_sort(int *num, int n);
+    double select_sort(int *num, int n);
+    double insert_sort(int *num, int n);
+    double merge_sort(int *num, int l, int r); 
+    double quick_sort(int *num, int l, int r);
+};
+
+double Sort::bubble_sort(int *num, int n) {
     int times = 1;
     for(int i = 1; i < n && times; i++) {
         times = 0;
@@ -34,7 +71,7 @@ double bubble_sort(int *num, int n) {
     return 1.0;
 }
 
-double hill_sort(int *num, int n) {
+double Sort::hill_sort(int *num, int n) {
     int d, i, j, temp;
     for(d = n / 2; d >= 1;d = d / 2){
         for(i = d; i < n;i++){
@@ -48,7 +85,7 @@ double hill_sort(int *num, int n) {
     return -1;
 }
 
-double insert_sort(int *num, int n) {
+double Sort::insert_sort(int *num, int n) {
     for(int i = 1; i < n; i++) {
         for(int j = i; j > 0 && num[j] < num[j - 1]; --j) {
             swap(num[j], num[j - 1]);
@@ -57,7 +94,7 @@ double insert_sort(int *num, int n) {
     return 1.0;
 }
 
-double merge_sort(int *num, int l, int r) {
+double Sort::merge_sort(int *num, int l, int r) {
     if(r - l <= 1) {
         if(r - l == 1 && num[l] > num[r]) {
             swap(num[l], num[r]);
@@ -81,7 +118,7 @@ double merge_sort(int *num, int l, int r) {
     return 1.0;
 }
 
-double quick_sort(int *num, int l, int r) {
+double Sort::quick_sort(int *num, int l, int r) {
     while (l < r) {
         int x = l, y = r, z = num[(l + r) >> 1];
         do {
@@ -98,7 +135,7 @@ double quick_sort(int *num, int l, int r) {
     return 1.0;
 }
 
-double select_sort(int *num, int n) {
+double Sort::select_sort(int *num, int n) {
     for(int i = 0; i < n - 1; i++) {
         int ind = i;
         for(int j = i + 1; j < n; j++) {
@@ -109,7 +146,7 @@ double select_sort(int *num, int n) {
     return 1.0;
 }
 
-double heap_sort(int *arr, int n) {
+double Sort::heap_sort(int *arr, int n) {
     int *p = arr - 1;
     for (int i = 2; i <= n; i++) {
         int ind = i;
