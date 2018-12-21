@@ -10,73 +10,73 @@
 #include <cassert>
 #include <iostream>
 
-typedef struct Queue {
+/*typedef struct Queue {
     int head, length, tail, cnt;
     int *data;
-} Queue;
+} Queue;*/
 
-class Queue_operation {
+class Queue {
 public:
-    Queue *init(int n);
-    int push (Queue *q, int value);
-    int empty(Queue *q);
-    void pop(Queue *q);
-    int front(Queue *q);
-    void clear(Queue *q);
-    void output(Queue *q);
+    Queue(int n = 100);
+    int push (int value);
+    int empty();
+    void pop();
+    int front();
+    void clear();
+    void output();
+private:
+    int head, length, tail, cnt;
+    int *data;
 };
 
-Queue* Queue_operation::init (int n) {
-    Queue *q = (Queue *)malloc(sizeof(Queue));
-    q->length = n;
-    q->data = (int *)malloc(sizeof(int ) * n);
-    q->cnt = 0;
-    q->head = 0;
-    q->tail = -1;
-    return q;
+Queue::Queue (int n) {
+    length = n;
+    data = (int *)malloc(sizeof(int ) * n);
+    cnt = 0;
+    head = 0;
+    tail = -1;
 }
 
-int Queue_operation::push (Queue *q, int value) {
-    if (q->cnt == q->length) return 0;
-    q->tail += 1;
-    if (q->tail >= q->length) q->tail -= q->length;
-    q->cnt += 1;
-    q->data[q->tail] = value;
+int Queue::push (int value) {
+    if (cnt == length) return 0;
+    tail += 1;
+    if (tail >= length) tail -= length;
+    cnt += 1;
+    data[tail] = value;
     return 1;
 }
 
-int Queue_operation::empty (Queue *q) {
-    return q->cnt == 0;
+int Queue::empty () {
+    return cnt == 0;
 }
 
-void Queue_operation::pop (Queue *q) {
-    if (empty(q)) return;
-    q->head += 1;
-    if (q->head >= q->length) q->head -= q->length;
-    q->cnt -= 1;
+void Queue::pop () {
+    if (empty()) return;
+    head += 1;
+    if (head >= length) head -= length;
+    cnt -= 1;
     return ;
 }
 
-int Queue_operation::front (Queue *q) {
-    if (empty(q)) return 0;
-    return q->data[q->head];
+int Queue::front () {
+    if (empty()) return 0;
+    return data[head];
 }
 
-void Queue_operation::output (Queue *q) {
+void Queue::output () {
     printf("Queue = [");
-    for (int i = 0; i < q->cnt; i = (i + 1) % q->length) {
-        int ind = (q->head + i) % q->length;
-        printf(" %d", q->data[ind]);
-        i + 1 == q->cnt || printf(",");
+    for (int i = 0; i < cnt; i = (i + 1) % length) {
+        int ind = (head + i) % length;
+        printf(" %d", data[ind]);
+        i + 1 == cnt || printf(",");
     }
     printf("]\n");
     return ;
 }
 
-void Queue_operation::clear (Queue *q) {
-    if (q == NULL) return ;
-    free(q->data);
-    free(q);
+void Queue::clear () {
+    if (data == NULL) return ;
+    free(data);
     return;
 }
 #endif
