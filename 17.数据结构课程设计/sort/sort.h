@@ -7,10 +7,17 @@
 
 #ifndef _SORT_H
 #define _SORT_H
+
 #include <cassert>
 #include <iostream>
+
 #define MAX_N 20
-#define TEST_TIME(funs) ({\
+
+#define out(arr) {\
+    cout << arr << endl;\
+}
+
+#define TIME(funs) ({\
     int begin = clock();\
     double ret = funs;\
     int end = clock();\
@@ -18,7 +25,7 @@
     ret;\
 })
 
-#define TEST(arr, n, func, args...) {\
+#define __FUNC(arr, n, func, args...) {\
     int *num = (int *)malloc(sizeof(int) * n);\
     memcpy(num, arr, sizeof(int) * n);\
     output(num, n);\
@@ -26,6 +33,16 @@
     func(args);\
     output(num, n);\
     free(num);\
+}
+
+#define FUNC_INVOKE(arr, n, func, args...) {\
+    cout << "/------------------------------------------" << endl << endl;\
+    __FUNC(arr, n, func, args);\
+    int *num = (int *)malloc(sizeof(int) * n);\
+    memcpy(num, arr, sizeof(int) * n);\
+    TIME(func(args));\
+    free(num);\
+    cout << "------------------------------------------/" << endl << endl;\
 }
 
 #define swap(a,b) {\
@@ -59,27 +76,27 @@ public:
 };
 
 double Sort::bubble_sort(int *num, int n) {
-    int times = 1;
-    for(int i = 1; i < n && times; i++) {
-        times = 0;
+    int judge = 1;
+    for(int i = 1; i < n && judge; i++) {
+        judge = 0;
         for(int j = 0; j < n - i; j++) {
             if(num[j] <= num[j + 1]) continue;
             swap(num[j], num[j + 1]);
-            times++;
+            judge++;
         }
     }
     return 1.0;
 }
 
 double Sort::hill_sort(int *num, int n) {
-    int d, i, j, temp;
-    for(d = n / 2; d >= 1;d = d / 2){
-        for(i = d; i < n;i++){
+    int i, j, k, temp;
+    for(k = n / 2; k >= 1;k = k / 2){
+        for(i = k; i < n;i++){
             temp = num[i];
-            for(j = i - d;(j >= 0) && (num[j] > temp);j = j - d) {
-                num[j + d] = num[j];
+            for(j = i - k;(j >= 0) && (num[j] > temp);j = j - k) {
+                num[j + k] = num[j];
             }
-            num[j + d] = temp;
+            num[j + k] = temp;
         }
     }
     return -1;
