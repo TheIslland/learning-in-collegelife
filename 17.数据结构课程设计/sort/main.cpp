@@ -36,46 +36,25 @@ int main() {
     switch(n) {
         case 8:
         case 1:
-            printf("/------------------------------------------\n");
-            __FUNC(arr[0], MAX_N, s.select_sort, num, MAX_N);
-            TIME(s.select_sort(arr[0], MAX_N));
-            printf("------------------------------------------/\n\n");
+            FUNC_INVOKE(arr[0], MAX_N, s.select_sort, num, MAX_N);
             if (n != 8) break;
         case 2:
-            printf("/------------------------------------------\n");
-            __FUNC(arr[1], MAX_N, s.quick_sort, num, 0, MAX_N - 1);
-            TIME(s.quick_sort(arr[1], 0, MAX_N - 1));
-            printf("------------------------------------------/\n\n");
+            FUNC_INVOKE(arr[1], MAX_N, s.quick_sort, num, 0, MAX_N - 1);
             if (n != 8) break;
         case 3:
-            printf("/------------------------------------------\n");
-            __FUNC(arr[2], MAX_N, s.insert_sort, num, MAX_N);
-            TIME(s.insert_sort(arr[2], MAX_N));
-            printf("------------------------------------------/\n\n");
+            FUNC_INVOKE(arr[2], MAX_N, s.insert_sort, num, MAX_N);
             if (n != 8) break;
         case 4:
-            printf("/------------------------------------------\n");
-            __FUNC(arr[3], MAX_N, s.bubble_sort, num, MAX_N);
-            TIME(s.bubble_sort(arr[3], MAX_N));
-            printf("------------------------------------------/\n\n");
+            FUNC_INVOKE(arr[3], MAX_N, s.bubble_sort, num, MAX_N);
             if (n != 8) break;
         case 5:
-            printf("/------------------------------------------\n");
-            __FUNC(arr[4], MAX_N, s.merge_sort, num, 0, MAX_N - 1);
-            TIME(s.merge_sort(arr[4], 0, MAX_N - 1));
-            printf("------------------------------------------/\n\n");
+            FUNC_INVOKE(arr[4], MAX_N, s.merge_sort, num, 0, MAX_N - 1);
             if (n != 8) break;
         case 6:
-            printf("/------------------------------------------\n");
-            __FUNC(arr[5], MAX_N, s.hill_sort, num, MAX_N);
-            TIME(s.hill_sort(arr[5], MAX_N));
-            printf("------------------------------------------/\n\n");
+            FUNC_INVOKE(arr[5], MAX_N, s.hill_sort, num, MAX_N);
             if (n != 8) break;
         case 7:
-            printf("/------------------------------------------\n");
-            __FUNC(arr[6], MAX_N, s.heap_sort, num, MAX_N);
-            TIME(s.heap_sort(arr[6], MAX_N));
-            printf("------------------------------------------/\n\n");
+            FUNC_INVOKE(arr[6], MAX_N, s.heap_sort, num, MAX_N);
             if (n != 8) break;
     }
     return 0;
