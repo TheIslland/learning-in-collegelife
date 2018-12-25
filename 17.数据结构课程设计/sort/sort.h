@@ -11,17 +11,26 @@
 #include <cassert>
 #include <iostream>
 
-#define MAX_N 20
+#define MAX_N 30000
 
 #define out(arr) {\
     cout << arr << endl;\
 }
 
 #define TIME(funs) ({\
-    int begin = clock();\
+    int start = clock();\
     double ret = funs;\
     int end = clock();\
-    printf("%lfms\n", (end - begin) * 1.0 / CLOCKS_PER_SEC * 1000);\
+    printf("%lfms\n", (end - start) * 1.0 / CLOCKS_PER_SEC * 1000);\
+    ret;\
+})
+
+#define ACQUIRE_TIME(times, funs) ({\
+    int start = clock();\
+    double ret = funs;\
+    int end = clock();\
+    times = (end - start) * 1.0 / CLOCKS_PER_SEC * 1000;\
+    printf("%lfms\n", times);\
     ret;\
 })
 
@@ -42,7 +51,6 @@
     memcpy(num, arr, sizeof(int) * n);\
     TIME(func(args));\
     free(num);\
-    cout << "------------------------------------------/" << endl << endl;\
 }
 
 #define swap(a,b) {\
@@ -50,7 +58,7 @@
 }
 
 void rand_num(int *num, int n) {
-    while(n--) num[n] = rand() % 321;
+    while(n--) num[n] = rand() % 30000;
     return ;
 }
 
@@ -73,6 +81,7 @@ public:
     double insert_sort(int *num, int n);
     double merge_sort(int *num, int l, int r); 
     double quick_sort(int *num, int l, int r);
+    double time_sort(double *num, int n);
 };
 
 double Sort::bubble_sort(int *num, int n) {
@@ -183,6 +192,15 @@ double Sort::heap_sort(int *arr, int n) {
             if (temp == ind) break;
             swap(p[temp], p[ind]);
             ind = temp;
+        }
+    }
+    return 1.0;
+}
+
+double Sort::time_sort(double *num, int n) {
+    for(int i = 1; i < n; i++) {
+        for(int j = i; j > 0 && num[j] < num[j - 1]; --j) {
+            swap(num[j], num[j - 1]);
         }
     }
     return 1.0;
