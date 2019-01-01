@@ -8,66 +8,14 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
-using namespace std;
+#include "arr.h"
 
-class shuzu {
-private:
-    int length;
-    int *data;
-public:
-    shuzu();
-    shuzu(int length);
-    int getlength();
-    int getvalue(int ind);
-    int setdata(int ind, int value);
-    void output();
-};
+using std::cin;
+using std::cout;
+using std::endl;
 
-shuzu::shuzu() {
-    length = 10;
-    data = new int[10];
-    for (int i = 0; i < 10; i++) {
-        data[i] = -1;
-    }
-}
-
-shuzu::shuzu(int len) {
-    length = len;
-    data = new int[len];
-    for (int i = 0; i < len; i++) {
-        data[i] = -1;
-    }
-}
-int shuzu::getlength() {
-    return length;
-}
-
-int shuzu::getvalue(int ind) {
-    if (ind > length) {
-        cout << "数组越界" << endl;
-        return -1;
-    }
-    return data[ind];
-}
-
-int shuzu::setdata(int ind, int value) {
-    if (ind > length) {
-        cout << "位置错误" << endl;
-        return -1;
-    }
-    data[ind] = value;
-    cout << "更改成功" << endl;
-    return 1;
-}
-
-void shuzu::output() {
-    for (int i = 0; i < length; i++) {
-        cout << data[i] << " ";
-    }
-    cout << endl;
-}
 int main() {
-    shuzu t;
+    arr t;
     t.output();
     cout << t.getlength() << endl;
     t.setdata(2, 23);
@@ -76,7 +24,7 @@ int main() {
     t.output();
     cout << t.getvalue(2) << endl;
     cout << endl;
-    shuzu t1(20);
+    arr t1(20);
     t1.output();
     cout << t1.getlength() << endl;
     t1.setdata(2, 23);
