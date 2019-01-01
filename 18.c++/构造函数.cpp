@@ -37,6 +37,7 @@ Clock::Clock(int newS, int newM, int newH){
 }
 int main(){
     Clock MyClock;
+    //构造函数不能采用Clock MyClock(); 这种形式会被理解为函数
     MyClock.showTime();
     int second,minute,hour;
     cin >> second >> minute >> hour;
