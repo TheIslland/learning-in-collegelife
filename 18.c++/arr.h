@@ -20,10 +20,12 @@ private:
 public:
     arr();
     arr(int length);
+    arr(arr &a);
     int getlength();
     int getvalue(int ind);
     int setdata(int ind, int value);
     void output();
+    ~arr();
 };
 
 arr::arr() {
@@ -41,6 +43,16 @@ arr::arr(int len) {
         data[i] = -1;
     }
 }
+
+arr::arr(arr &a) {
+    length = a.length;
+    data = a.data;
+}
+
+arr::~arr() {
+    cout << "success" << endl;
+}
+
 int arr::getlength() {
     return length;
 }
