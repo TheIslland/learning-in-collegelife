@@ -32,5 +32,13 @@ int main() {
     t1.setdata(11, 22);
     t1.output();
     cout << t1.getvalue(2) << endl;
+    arr t2(t1);
+    t2.output();
+    cout << t2.getlength() << endl;
+    t2.setdata(2, 23);
+    t2.output();
+    t2.setdata(11, 22);
+    t2.output();
+    cout << t2.getvalue(2) << endl;
     return 0;
 }
