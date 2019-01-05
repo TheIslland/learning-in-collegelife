@@ -13,7 +13,7 @@
 
 void get_next (char *pattern, char *next) {
     next[0] = -1;
-    for (int i = 1, master = -1; i < strlen(pattern); i++) {
+    for (int i = 1, master = -1; pattern[i]; i++) {
         while (master >= 0 && pattern[master + 1] != pattern[i]) {
             master = next[master];
         }
