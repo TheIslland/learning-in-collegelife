@@ -49,5 +49,7 @@ int main() {
     t.printI();
     Test t1 = func2(); // 发生一次拷贝
     func1(t); //有拷贝构造函数调用
+    Test t2[3] = {Test(1). Test(2), Test(3)}; // 将会调用三次拷贝构造函数
+    Test t3[3] = {1, 2, 3}; //返回值优化后相当于
     return 0;
 }
