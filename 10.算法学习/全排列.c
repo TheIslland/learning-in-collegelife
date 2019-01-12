@@ -43,6 +43,30 @@ int next_permutation(char *first, char *end) {
     return 0;
 }
 
+int isInswap(char *str, int l, int r) {
+    for (int i = l; i < r; i++) {
+        if (str[i] == str[r]) return 0;
+    }
+    return 1;
+}
+
+void next_permutation_recursion(char *str, int first, int end) {
+    if (first == end) {
+        for (int i = 0; i < 5; i++) {
+            printf("%d", str[i]);
+        }
+        printf("\n");
+    } else {
+        for (int i = first; i <= end; i++) {
+            if (isInswap(str, first, i)) {
+                swap(str + i, str + first);
+                next_permutation_recursion(str, first + 1, end);
+                swap(str + i, str + first);
+            }       
+        }
+    }
+}
+
 int main() { 
     char a[5] = {0, 1, 2, 3, 4};
     do {
