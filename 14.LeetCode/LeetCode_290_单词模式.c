@@ -9,15 +9,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-
-const int SIZE = 26;
+//由题意可知，我们要分别获取两个串的模式串，经分析可知，我们可以对str字符串建字典树标记求得模式串，对于模式串我们可以采用标记数组模拟字典树来求得模式串
+const int SIZE = 26; //字典树单位广度
 const char BASE = 'a';
 
+//字典树声明
 typedef struct Node {
     int flag;
     struct Node **childs;
 }*Trie, TrieNode;
 
+//字典树新节点申请
 TrieNode *new_node() {
     TrieNode *p = (TrieNode *)malloc(sizeof(TrieNode));
     p->childs = (TrieNode **)malloc(sizeof(TrieNode *) * SIZE);
@@ -28,6 +30,7 @@ TrieNode *new_node() {
     return p;
 }
 
+//字典树新节点插入，有两个传出参数ind表示字符串中的字符种类数,num表示记录到模式串数组中的第几位。arr表示记录模式串的数组
 void insert(TrieNode *trie, char *str, int *ind, int *arr, int *num) {
     TrieNode *p = trie;
     for (int i = 0; str[i]; i++) {
@@ -36,6 +39,7 @@ void insert(TrieNode *trie, char *str, int *ind, int *arr, int *num) {
         }
         p = p->childs[str[i] - BASE];
     }
+    //如果该单词在字典树中不存在，记录其值为当前种类数，模式值与标记值相同，种类数加一，反之存在时只要将模式值赋值为标记值即可
     if (p->flag == 0) {
         p->flag = *ind;
         arr[*num] = *ind;
@@ -43,7 +47,6 @@ void insert(TrieNode *trie, char *str, int *ind, int *arr, int *num) {
     } else {
         arr[*num] = p->flag;   
     }
-   // printf("ind1 = %d %d\n", *ind, *num);
     *num += 1;
 } 
 
@@ -59,6 +62,7 @@ bool wordPattern(char* pattern, char* str) {
         insert(root1, temp, &ind1, str_log, &n);
         temp = strtok(NULL, " ");
     }
+    //数组模拟字典树，分别入树
     for (int i = 0 ; i < len1; i++) {
         if (pat[pattern[i] - BASE] == 0) {
             pat[pattern[i] - BASE] = ind2;
@@ -69,9 +73,7 @@ bool wordPattern(char* pattern, char* str) {
         }
         m++;
     }
-    //printf("%d\n", len);
     for (int i = 0; i < len; i++) {
-       // printf("%d %d\n", str_log[i], pattern_log[i]);
         if (str_log[i] != pattern_log[i]) return false;
     }
     return true;
