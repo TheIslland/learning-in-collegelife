@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+//对于比较版本好采取，按.分割加字符串转整形数可以解决
 int compareVersion(char* version1, char* version2) {
     int len1 = strlen(version1), len2 = strlen(version2);
     for (int i = 0, j = 0; i < len1 || j < len2;) {
