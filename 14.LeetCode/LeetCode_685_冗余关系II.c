@@ -4,102 +4,86 @@
 	> Mail: 861436930@qq.com
 	> Created Time: 2019年01月21日 星期一 11时09分53秒
  ************************************************************************/
-
-typedef struct UnionSet {
-    int *fa;
-    int *size;
-    int n;
+typedef struct DisjointSet {
+    int *father;
+    int *rank;
     int cnt;
-} UnionSet;
+} DisjointSet;
 
-UnionSet *init(int n) {
-    UnionSet *u = (UnionSet *)malloc(sizeof(UnionSet));
-    u->fa = (int *)malloc(sizeof(int) * n);
-    u->size = (int *)malloc(sizeof(int) * n);
-    u->n = n;
-    u->cnt = n;
-    for (int i = 0; i < n; i++) {
-        u->fa[i] = i;
-        u->size[i] = 1;
+DisjointSet *init(int n) {
+    DisjointSet *s = (DisjointSet *)malloc(sizeof(DisjointSet));
+    s->father = (int *)malloc(sizeof(int) * n);
+    s->rank = (int *)malloc(sizeof(int) * n);
+    for (int i = 0; i < n; ++i) {
+        s->father[i] = i;
+        s->rank[i] = 1;
     }
-    return u;
+    s->cnt = n - 1;
+    return s;
 }
 
-int find(UnionSet *u, int x) {
-    if (u->fa[x] == x) return x;
-    return (u->fa[x] = find(u, u->fa[x]));
-}
-
-int merge(UnionSet *u, int a, int b) {
-    int f[2] = { find(u, a), find(u, b) };
-    if (f[1] == f[0]) return 0;
-    int flag = (u->size[f[0]] > u->size[f[1]]);
-    u->fa[f[flag]] = f[!flag];
-    u->size[f[!flag]] += u->size[f[flag]];
-    u->cnt -= 1;
-    return 1;
-}
-
-void clear(UnionSet *u) {
-    if (u == NULL) return ;
-    free(u->fa);
-    free(u->size);
-    free(u);
+void clear(DisjointSet *s) {
+    if (s == NULL) return ;
+    free(s->father);
+    free(s->rank);
+    free(s);
     return ;
 }
 
-int* findRedundantDirectedConnection(int** edges, int n, int m, int* returnSize) {
-    int *ret = (int *)calloc(sizeof(int), 2);
+int find(DisjointSet *s, int node) {
+    if (s->father[node] == node) return node;
+    s->father[node] = find(s, s->father[node]);
+    return s->father[node];
+}
+
+int joint(DisjointSet *s, int node1, int node2) {
+    int father1 = find(s, node1);
+    int father2 = find(s, node2);
+    if (father1 == father2) return 0;
+    if (s->rank[father1] >= s->rank[father2]) {
+        s->father[father2] = father1;
+        s->rank[father1] += s->rank[father2];
+    } else {
+        s->father[father1] = father2;
+        s->rank[father2] += s->rank[father1];    
+    }
+    s->cnt--;
+    return 1;
+}
+
+int* findRedundantDirectedConnection(int** edges, int edgesRowSize, int edgesColSize, int* returnSize) {
+    DisjointSet *set = init(edgesRowSize + 1);
+    int *ans = (int *)calloc(sizeof(int), 2);
+    int *count = (int *)calloc(sizeof(int), (edgesRowSize + 1));
+    int flag = 0, temp = 1;
     *returnSize = 2;
-    int *indeg = (int *)calloc(sizeof(int), n + 1);
-    int *outdeg = (int *)calloc(sizeof(int), n + 1);
-    int *father = (int *)calloc(sizeof(int), n + 1);
-    int *queue = (int *)calloc(sizeof(int), n + 1);
-    int head = 0, tail = 0;
-    for (int i = 0; i < n; i++) {
-        indeg[edges[i][1]] += 1;
-        outdeg[edges[i][0]] += 1;
-        father[edges[i][1]] = edges[i][0];
-    }
-    int flag = 0;
-    for (int i = 1; i <= n; i++) {
-        flag = (indeg[i] == 2);
-        if (flag) { flag = i; break; }
-    }
-    if (flag) {
-        
-        for (int i = n - 1; i >= 0; --i) {
-            if (edges[i][1] - flag) continue;
-            UnionSet *u = init(n + 1);
-            for (int j = 0; j < n; j++) {
-                if (i == j) continue;
-                merge(u, edges[j][0], edges[j][1]);
-            }
-            if (u->cnt != 2) {
-                clear(u);
-                continue;
-            }
-            ret[0] = edges[i][0];
-            ret[1] = edges[i][1];
-            clear(u);
+    for (int i = 0; i < edgesRowSize; ++i) {
+        if (count[edges[i][1]]) {
+            flag = i;
             break;
         }
+        count[edges[i][1]] = i + 1;
+    }   
+    if (flag) {
+        for (int i = 0; i < edgesRowSize; ++i) {
+            if (i == flag) continue;
+            if (joint(set, edges[i][0], edges[i][1])) continue;
+            temp = 0;
+        }
+        if (temp && set->cnt == 1) {
+            ans[0] = edges[flag][0];
+            ans[1] = edges[flag][1];
+        } else {
+            ans[0] = edges[count[edges[flag][1]] - 1][0];
+            ans[1] = edges[count[edges[flag][1]] - 1][1];
+        }
     } else {
-        for (int i = 1; i <= n; i++) {
-            if (outdeg[i]) continue;
-            queue[tail++] = i;
-        }
-        while (head < tail) {
-            int ind = queue[head++];
-            if (!(--outdeg[father[ind]])) queue[tail++] = father[ind];
-        }
-        for (int i = n - 1; i >= 0; i--) {
-            if (outdeg[edges[i][0]] && outdeg[edges[i][1]]) {
-                ret[0] = edges[i][0];
-                ret[1] = edges[i][1];
-                break;
-            }
+        for (int i = 0; i < edgesRowSize; ++i) {
+            if (joint(set, edges[i][0], edges[i][1])) continue;
+            ans[0] = edges[i][0];
+            ans[1] = edges[i][1];
         }
     }
-    return ret;
+    clear(set);
+    return ans;
 }
