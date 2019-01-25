@@ -9,20 +9,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//比较宏
 #define max(a, b) ({ \
     __typeof(a) __a = (a); \
     __typeof(b) __b = (b); \
     __a > __b ? __a : __b; \
 })
 
+//AVL树结构定义
 typedef struct Node {
-    int key;
-    int height;
+    int key; //存储权值，用于查找
+    int height; //存储树高用于平衡
     struct Node *lchild, *rchild;
 } Node;
 
+//一个虚拟节点
 Node *NIL = NULL;
 
+//按key值初始化ＡＶＬ树节点
 Node *init(int key) {
     Node *p = (Node *)calloc(sizeof(Node), 1);
     p->key = key;
@@ -31,6 +35,7 @@ Node *init(int key) {
     return p;
 }
 
+//在所有函数初始化之前初始化NIL
 __attribute__((constructor))
 void init_NIL() {
     NIL = init(0);
@@ -39,20 +44,23 @@ void init_NIL() {
     return ;
 }
 
+//更新树高
 void calc_height(Node *root) {
-    root->height = max(root->lchild->height, root->rchild->height) + 1;
+    root->height = max(root->lchild->height, root->rchild->height) + 1; //取左右子树中树高最大的那个加一
     return ;
 }
 
+//左旋操作
 Node *left_rotate(Node *root) {
-    Node *temp = root->rchild;
-    root->rchild = temp->lchild;
-    temp->lchild = root;
-    calc_height(root);
-    calc_height(temp);
-    return temp;
+    Node *temp = root->rchild; //如果进行左旋，则新的根节点必为原根节点的右孩子成为根节点
+    root->rchild = temp->lchild; //首先让原根节点的右子树更新为新根节点的左子树
+    temp->lchild = root; //新根节点的左子树更新为原根节点
+    calc_height(root); //更新树高
+    calc_height(temp); 
+    return temp; //更新根节点
 }
 
+//右旋操作
 Node *right_rotate(Node *root) {
     Node *temp = root->lchild;
     root->lchild = temp->rchild;
@@ -62,52 +70,56 @@ Node *right_rotate(Node *root) {
     return temp;
 }
 
+//平衡操作
 Node *maintain(Node *root) {
-    if (abs(root->lchild->height - root->rchild->height) <= 1) return root;
-    if (root->lchild->height > root->rchild->height) {
-        if (root->lchild->lchild->height < root->lchild->rchild->height) {
-            root->lchild = left_rotate(root->lchild);
+    if (abs(root->lchild->height - root->rchild->height) <= 1) return root; //如果左右树高差小于１则视为平衡不操作
+    if (root->lchild->height > root->rchild->height) { //如果左子树高高于右子树高
+        if (root->lchild->lchild->height < root->lchild->rchild->height) { //且左子树的右子树较高
+            root->lchild = left_rotate(root->lchild); //先进行左旋
         }
-        root = right_rotate(root);
+        root = right_rotate(root); //再进行右旋
     } else {
-        if (root->rchild->rchild->height < root->rchild->lchild->height) {
-            root->rchild = right_rotate(root->rchild);
+        if (root->rchild->rchild->height < root->rchild->lchild->height) { //如果右子树高高于左子树高且右子树的左子树高
+            root->rchild = right_rotate(root->rchild); //先右旋再左旋
         }
         root = left_rotate(root);
     }
     return root;
 }
 
+//插入操作
 Node *insert(Node *root, int key) {
-    if (root == NIL) return init(key);
-    if (root->key == key) return root;
-    else if (root->key < key) root->rchild = insert(root->rchild, key);
-    else root->lchild = insert(root->lchild, key);
-    calc_height(root);
-    return maintain(root);
+    if (root == NIL) return init(key); //如果树空则初始化为根节点
+    if (root->key == key) return root; //如果该节点已存在则直接返回
+    else if (root->key < key) root->rchild = insert(root->rchild, key); //如果插入节点比当前节点大，插入到其右子树下
+    else root->lchild = insert(root->lchild, key); //反之插入到左子树下
+    calc_height(root); //更新树高
+    return maintain(root); //平衡
 }
 
+//获取前驱
 Node *predecessor(Node *root) {
     Node *temp = root->lchild;
     while (temp->rchild != NIL) temp = temp->rchild;
     return temp;
 }
 
+//删除操作
 Node *erase(Node *root, int key) {
-    if (root == NIL) return root;
-    if (root->key < key) {
+    if (root == NIL) return root; //如果当前为虚拟节点
+    if (root->key < key) { //如果比当前节点小，递归删除
         root->rchild = erase(root->rchild, key);
     } else if (root->key > key) {
         root->lchild = erase(root->lchild, key);
-    } else {
-        if (root->lchild == NIL && root->rchild == NIL) {
+    } else { //如果找到删除点
+        if (root->lchild == NIL && root->rchild == NIL) { //如果为叶子节点，直接释放
             free(root);
             return NIL;
-        } else if (root->lchild == NIL || root->rchild == NIL) {
+        } else if (root->lchild == NIL || root->rchild == NIL) { //如果为单子节点，处理
             Node *temp = (root->lchild != NIL ? root->lchild : root->rchild);
             free(root);
             return temp;
-        } else {
+        } else { //有双子节点。
             Node *temp = predecessor(root); 
             root->key = temp->key;
             root->lchild = erase(root->lchild, temp->key);
@@ -117,6 +129,7 @@ Node *erase(Node *root, int key) {
     return maintain(root);
 }
 
+//
 void clear(Node *node) {
     if (node == NIL) return ;
     clear(node->lchild);
@@ -125,6 +138,7 @@ void clear(Node *node) {
     return ;
 }
 
+//
 void output(Node *root) {
     if (root == NIL) return ;
     printf("(%d, %d, %d)\n", root->key, root->lchild->key, root->rchild->key);
@@ -133,6 +147,7 @@ void output(Node *root) {
     return ;
 }
 
+//
 int main() {
     int op, val;
     Node *root = NIL;
