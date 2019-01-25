@@ -13,7 +13,7 @@
 typedef struct SBTNode {
     int data, size;
     struct SBTNode *lchild, *rchild, *father;
-} SBTNode;
+}SBTNode;
 
 SBTNode* init(int init_data, int init_size, SBTNode *init_father);
 
@@ -47,10 +47,19 @@ SBTNode* left_rotate(SBTNode *node) {
     node->father = temp;
     temp->size = node->size;
     node->size = node->lchild->size + node->rchild->size + 1;
-	return temp;
+    return temp;
 }
 
 SBTNode* right_rotate(SBTNode *node) {
+	SBTNode *temp = node->lchild;
+	node->lchild = temp->rchild;
+    temp->rchild->father = node;
+    temp->rchild = node;
+    temp->father = node->father;
+    node->father = temp;
+    temp->size = node->size;
+    node->size = node->lchild->size + node->rchild->size + 1;
+    return temp;
 }
 
 SBTNode* maintain(SBTNode *node, int flag) {
@@ -104,8 +113,8 @@ SBTNode* insert_node(SBTNode *node, int value) {
 }
 
 
-SBTNode* predecessor(SBTNode *node) {
-    SBTNode *temp = node->lchild;
+SBTNode * predecessor(SBTNode * node) {
+    SBTNode * temp = node->lchild;
     while (temp != NIL && temp->rchild != NIL) {
         temp = temp->rchild;
     }
