@@ -51,8 +51,8 @@ SBTNode* left_rotate(SBTNode *node) {
 }
 
 SBTNode* right_rotate(SBTNode *node) {
-	SBTNode *temp = node->lchild;
-	node->lchild = temp->rchild;
+    SBTNode *temp = node->lchild;
+    node->lchild = temp->rchild;
     temp->rchild->father = node;
     temp->rchild = node;
     temp->father = node->father;
@@ -63,6 +63,30 @@ SBTNode* right_rotate(SBTNode *node) {
 }
 
 SBTNode* maintain(SBTNode *node, int flag) {
+	if (flag == 0) {
+		if (node->lchild->lchild->size > node->rchild->size) {
+			node = right_rotate(node);
+        } else if (node->lchild->rchild->size > node->rchild->size){
+			node->lchild = left_rotate(node->lchild);
+            node = right_rotate(node);
+        } else {
+			return node;
+            }
+    } else {
+		if (node->rchild->rchild->size > node->lchild->size) {
+			node = left_rotate(node);
+        } else if (node->rchild->lchild->size > node->lchild->size) {
+			node->rchild = right_rotate(node->rchild);
+            node = left_rotate(node);
+        } else {
+			return node;
+        }
+    }
+    node->lchild = maintain(node->lchild, 0);
+    node->rchild = maintain(node->rchild, 1);
+	node = maintain(node, 0);
+    node = maintain(node, 1);
+    return node;
 }
 
 SBTNode* insert(SBTNode *node, int value) {
@@ -113,8 +137,8 @@ SBTNode* insert_node(SBTNode *node, int value) {
 }
 
 
-SBTNode * predecessor(SBTNode * node) {
-    SBTNode * temp = node->lchild;
+SBTNode* predecessor(SBTNode *node) {
+    SBTNode *temp = node->lchild;
     while (temp != NIL && temp->rchild != NIL) {
         temp = temp->rchild;
     }
@@ -174,6 +198,17 @@ int delete_tree(SBTNode *node, int value) {
     return OK;
 }
 
+int select(SBTNode *node, int k) {
+    int rank = node->lchild->size + 1;
+    if (rank == k) {
+        return node->data;
+    } else if (k < rank) {
+        return select(node->lchild, k);
+    } else {
+        return select(node->rchild, k - rank);
+    }
+}
+
 void clear(SBTNode *node) {
     if (node != NIL) {
         if (node->lchild != NIL) {
@@ -187,5 +222,25 @@ void clear(SBTNode *node) {
 }
 
 int main() {
+    init_NIL();
+    SBTNode *binarytree = NULL;
+    int arr[10] = { 8, 9, 10, 3, 2, 1, 6, 4, 7, 5 };
+    for (int i = 0; i < 10; i++) {
+        binarytree = insert_node(binarytree, arr[i]);
+    }
+    int value;
+    scanf("%d", &value);
+    if (search(binarytree, value) != NIL) {
+        printf("search success!\n");
+    } else {
+        printf("search failed!\n");
+    }    
+    scanf("%d", &value);
+    if (delete_tree(binarytree, value)) {
+        printf("delete success!\n");
+    } else {
+        printf("delete failed!\n");
+    }
+    clear(binarytree);
     return 0;
 }
