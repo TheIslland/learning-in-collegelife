@@ -100,36 +100,36 @@ Node *insert(Node *root, int key) {
 //获取前驱
 Node *predecessor(Node *root) {
     Node *temp = root->lchild;
-    while (temp->rchild != NIL) temp = temp->rchild;
+    while (temp->rchild != NIL) temp = temp->rchild; //一个点的前驱在排序二叉树中是比当前点小的点中最大的点，故应为左子树中最深的右子树节点
     return temp;
 }
 
 //删除操作
 Node *erase(Node *root, int key) {
-    if (root == NIL) return root; //如果当前为虚拟节点
-    if (root->key < key) { //如果比当前节点小，递归删除
+    if (root == NIL) return root; //如果当前为虚拟节点，不处理直接返回
+    if (root->key < key) { //如果当前节点比要删除的节点小，去右子树递归删除
         root->rchild = erase(root->rchild, key);
-    } else if (root->key > key) {
+    } else if (root->key > key) { //反之，如果比要删除的节点大，则去左子树中删除
         root->lchild = erase(root->lchild, key);
-    } else { //如果找到删除点
-        if (root->lchild == NIL && root->rchild == NIL) { //如果为叶子节点，直接释放
+    } else { //如果找到了要删除的点
+        if (root->lchild == NIL && root->rchild == NIL) { //如果为叶子节点，直接释放，并返回一个虚节点
             free(root);
             return NIL;
-        } else if (root->lchild == NIL || root->rchild == NIL) { //如果为单子节点，处理
+        } else if (root->lchild == NIL || root->rchild == NIL) { //如果节点为有一个孩子的节点，则找到那个孩子节点，删除待删除节点，将那个孩子节点作为原节点的代替
             Node *temp = (root->lchild != NIL ? root->lchild : root->rchild);
             free(root);
             return temp;
-        } else { //有双子节点。
+        } else { //如果为有两个孩子节点的节点，则查找前驱节点为待删除节点的替代
             Node *temp = predecessor(root); 
             root->key = temp->key;
             root->lchild = erase(root->lchild, temp->key);
         }
     }
-    calc_height(root);
-    return maintain(root);
+    calc_height(root); //更新树高
+    return maintain(root); //进行树的平衡操作
 }
 
-//
+//进行树的清空操作
 void clear(Node *node) {
     if (node == NIL) return ;
     clear(node->lchild);
@@ -138,7 +138,7 @@ void clear(Node *node) {
     return ;
 }
 
-//
+//进行树的遍历操作
 void output(Node *root) {
     if (root == NIL) return ;
     printf("(%d, %d, %d)\n", root->key, root->lchild->key, root->rchild->key);
@@ -147,7 +147,6 @@ void output(Node *root) {
     return ;
 }
 
-//
 int main() {
     int op, val;
     Node *root = NIL;
