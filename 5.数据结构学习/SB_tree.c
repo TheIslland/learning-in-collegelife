@@ -11,14 +11,15 @@
 #define OK 1
 
 typedef struct SBTNode {
-    int data, size;
-    struct SBTNode *lchild, *rchild, *father;
+    int data, size; //节点的值与当前节点下节点个数
+    struct SBTNode *lchild, *rchild, *father; //指针指向，左孩子，右孩子，和父亲节点
 }SBTNode;
 
-SBTNode* init(int init_data, int init_size, SBTNode *init_father);
+SBTNode* init(int init_data, int init_size, SBTNode *init_father); //初始化ＳＢ节点函数，参数为节点值，节点个数，和父节点
 
-SBTNode *NIL;
+SBTNode *NIL; //虚拟叶子节点
 
+//虚拟节点初始化
 void init_NIL() {
     NIL = (SBTNode *)malloc(sizeof(SBTNode));
     NIL->data = 0;
@@ -28,6 +29,7 @@ void init_NIL() {
     NIL->father = NULL;
 }
 
+//初始化ＳＢ节点
 SBTNode* init(int init_data, int init_size, SBTNode *init_father) {
     SBTNode *node = (SBTNode *)malloc(sizeof(SBTNode));
     node->data = init_data;
@@ -38,18 +40,20 @@ SBTNode* init(int init_data, int init_size, SBTNode *init_father) {
     return node;
 }
 
+//左旋操作
 SBTNode* left_rotate(SBTNode *node) {
-    SBTNode *temp = node->rchild;
-    node->rchild = temp->lchild;
-    temp->lchild->father = node;
-    temp->lchild = node;
-    temp->father = node->father;
-    node->father = temp;
-    temp->size = node->size;
-    node->size = node->lchild->size + node->rchild->size + 1;
-    return temp;
+    SBTNode *temp = node->rchild; //声明ｔｅｍｐ节点指向旋转节点的右子树根节点
+    node->rchild = temp->lchild; //将ｔｅｍｐ节点的左子树转化为原根节点的右子树
+    temp->lchild->father = node; //ｔｅｍｐ的左子树的父亲节点初始化为原根节点
+    temp->lchild = node; //ｔｅｍｐ节点的左子树转化为原根节点
+    temp->father = node->father; //ｔｅｍｐ节点的父亲节点初始化化为原根节点的父亲节点
+    node->father = temp; //原根节点的父亲节点为ｔｅｍｐ节点
+    temp->size = node->size; //ｔｅｍｐ节点的节点数初始化为原根节点的节点数
+    node->size = node->lchild->size + node->rchild->size + 1; //原根节点的节点数的更新为其下左右节点数和加一
+    return temp; //返回现在根节点
 }
 
+//右旋操作
 SBTNode* right_rotate(SBTNode *node) {
     SBTNode *temp = node->lchild;
     node->lchild = temp->rchild;
@@ -62,9 +66,10 @@ SBTNode* right_rotate(SBTNode *node) {
     return temp;
 }
 
+//节点平衡操作
 SBTNode* maintain(SBTNode *node, int flag) {
 	if (flag == 0) {
-		if (node->lchild->lchild->size > node->rchild->size) {
+			if (node->lchild->lchild->size > node->rchild->size) {
 			node = right_rotate(node);
         } else if (node->lchild->rchild->size > node->rchild->size){
 			node->lchild = left_rotate(node->lchild);
@@ -89,6 +94,7 @@ SBTNode* maintain(SBTNode *node, int flag) {
     return node;
 }
 
+//插入操作
 SBTNode* insert(SBTNode *node, int value) {
     node->size++;
     if (value > node->data) {
@@ -107,6 +113,7 @@ SBTNode* insert(SBTNode *node, int value) {
     return maintain(node, value > node->data);
 }
 
+//查找操纵
 SBTNode* search(SBTNode *node, int value) {
     if (node == NIL || node->data == value) {
         return node;
@@ -125,6 +132,7 @@ SBTNode* search(SBTNode *node, int value) {
     }
 }
 
+//插入操作
 SBTNode* insert_node(SBTNode *node, int value) {
     if (node == NULL) {
         node = init(value, 1, NULL);
@@ -136,7 +144,7 @@ SBTNode* insert_node(SBTNode *node, int value) {
     return insert(node, value);
 }
 
-
+//返回前驱
 SBTNode* predecessor(SBTNode *node) {
     SBTNode *temp = node->lchild;
     while (temp != NIL && temp->rchild != NIL) {
@@ -145,6 +153,7 @@ SBTNode* predecessor(SBTNode *node) {
     return temp;
 }
 
+//返回后继
 SBTNode* successor(SBTNode *node) {
     SBTNode *temp = node->rchild;
     while (temp != NIL && temp->lchild != NIL) {
@@ -153,6 +162,7 @@ SBTNode* successor(SBTNode *node) {
     return temp;
 }
 
+//删除操作
 void remove_node(SBTNode *delete_node) {
     SBTNode *temp = NIL;
     if (delete_node->lchild != NIL) {
@@ -180,6 +190,7 @@ void remove_node(SBTNode *delete_node) {
     free(delete_node);
 }
 
+//
 int delete_tree(SBTNode *node, int value) {
     SBTNode *delete_node, *current_node;
     current_node = search(node, value);
@@ -198,6 +209,7 @@ int delete_tree(SBTNode *node, int value) {
     return OK;
 }
 
+//
 int select(SBTNode *node, int k) {
     int rank = node->lchild->size + 1;
     if (rank == k) {
@@ -209,6 +221,7 @@ int select(SBTNode *node, int k) {
     }
 }
 
+//
 void clear(SBTNode *node) {
     if (node != NIL) {
         if (node->lchild != NIL) {
