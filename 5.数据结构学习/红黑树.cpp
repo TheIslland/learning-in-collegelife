@@ -9,29 +9,35 @@
 #include <stdlib.h>
 #include <time.h>
 
+//红黑树颜色定义
 #define RED 0
 #define BLACK 1
 #define DOUBLE_BLACK 2
 
+//颜色类名定义
 typedef int color_t;
 
+//红黑树的结构体定义
 typedef struct RBTNode {
-    int key;
+    int key; //权值的存储
     color_t color; // 0 red, 1 black, 2 double black
-    struct RBTNode *lchild, *rchild;
+    struct RBTNode *lchild, *rchild; //声明左子树，声明右子树
 } RBTNode;
 
+//声明虚拟节点
 RBTNode *NIL;
 
+//优先执行虚拟节点的初始化操作
 __attribute__((constructor))
 void init_NIL() {
     NIL = (RBTNode *)malloc(sizeof(RBTNode));
-    NIL->key = -1;
-    NIL->color = BLACK;
-    NIL->rchild = NIL->lchild = NIL;
+    NIL->key = -1; //将虚拟节点的ｋｅｙ值初始化为-1
+    NIL->color = BLACK; //将虚拟节点设置为黑色
+    NIL->rchild = NIL->lchild = NIL; //初始化左右子树
     return ;
 }
 
+//初始化
 RBTNode *init(int key) {
     RBTNode *p = (RBTNode *)malloc(sizeof(RBTNode));
     p->key = key;
@@ -40,10 +46,12 @@ RBTNode *init(int key) {
     return p;
 }
 
+//
 int has_red_child(RBTNode *root) {
     return root->lchild->color == RED || root->rchild->color == RED;
 }
 
+//
 RBTNode *left_rotate(RBTNode *node) {
     RBTNode *temp = node->rchild;
     node->rchild = temp->lchild;
@@ -51,6 +59,7 @@ RBTNode *left_rotate(RBTNode *node) {
     return temp;
 }
 
+//
 RBTNode *right_rotate(RBTNode *node) {
     RBTNode *temp = node->lchild;
     node->lchild = temp->rchild;
@@ -58,6 +67,7 @@ RBTNode *right_rotate(RBTNode *node) {
     return temp;
 }
 
+//
 RBTNode *insert_maintain(RBTNode *root) {
     if (!has_red_child(root)) return root;
     if (root->lchild->color == RED && root->rchild->color == RED) {
