@@ -42,16 +42,16 @@ RBTNode *init(int key) {
     RBTNode *p = (RBTNode *)malloc(sizeof(RBTNode));
     p->key = key;
     p->lchild = p->rchild = NIL;
-    p->color = RED;
+    p->color = RED; //所有新节点的颜色都是红色
     return p;
 }
 
-//
+//判断当前节点的左右孩子里是否有红色节点
 int has_red_child(RBTNode *root) {
     return root->lchild->color == RED || root->rchild->color == RED;
 }
 
-//
+//左旋操作
 RBTNode *left_rotate(RBTNode *node) {
     RBTNode *temp = node->rchild;
     node->rchild = temp->lchild;
@@ -59,7 +59,7 @@ RBTNode *left_rotate(RBTNode *node) {
     return temp;
 }
 
-//
+//右旋操作
 RBTNode *right_rotate(RBTNode *node) {
     RBTNode *temp = node->lchild;
     node->lchild = temp->rchild;
@@ -67,37 +67,39 @@ RBTNode *right_rotate(RBTNode *node) {
     return temp;
 }
 
-//
+//插入操作的平衡调节
 RBTNode *insert_maintain(RBTNode *root) {
-    if (!has_red_child(root)) return root;
-    if (root->lchild->color == RED && root->rchild->color == RED) {
-    } else if (root->lchild->color == RED && has_red_child(root->lchild)) {
-        if (root->lchild->rchild->color == RED) {
+    if (!has_red_child(root)) return root; //判断当前节点的子孩子中是否有红色节点，如果没有红色节点则不需要进行插入调整
+    //以下是对子孩子中有红色节点的情况进行操作，即双红的情况
+    if (root->lchild->color == RED && root->rchild->color == RED) { //此情况没有必要处理
+    } else if (root->lchild->color == RED && has_red_child(root->lchild)) { //如果为在其左子树中异常
+        if (root->lchild->rchild->color == RED) { //判断是不是ＬＲ型，是则先进性小左旋，再进行大右旋
             root->lchild = left_rotate(root->lchild);
         }
-        root = right_rotate(root);
-    }  else if (root->rchild->color == RED && has_red_child(root->rchild)) {
-        if (root->rchild->lchild->color == RED) {
+        root = right_rotate(root); //大右旋
+    }  else if (root->rchild->color == RED && has_red_child(root->rchild)) { //判断是不是右子树异常
+        if (root->rchild->lchild->color == RED) { //判断是不是ＲＬ型，是则先进性小右旋，再进行左旋
             root->rchild = right_rotate(root->rchild);
         }
-        root = left_rotate(root);
+        root = left_rotate(root); //大左旋
     } else {
-        return root;
+        return root; //
     }
-    root->color = RED;
-    root->lchild->color = root->rchild->color = BLACK;
+    root->color = RED; //将父节点的颜色变为红色
+    root->lchild->color = root->rchild->color = BLACK; //他的两个子孩子变为黑色
     return root;
 }
 
+//插入操作
 RBTNode *__insert(RBTNode *root, int key) {
-    if (root == NIL) return init(key);
-    if (root->key == key) return root;
-    else if (root->key > key) {
+    if (root == NIL) return init(key); //如果当前节点已经是虚拟叶子节点，则创建新节点
+    if (root->key == key) return root; //如果该权值的节点已经存在则，不作操作直接的返回原节点
+    else if (root->key > key) { //如果当前节点比插入节点大则去左子树中寻找
         root->lchild = __insert(root->lchild, key);
-    } else {
+    } else { //反之去右子树中寻找
         root->rchild = __insert(root->rchild, key);
     }
-    return insert_maintain(root);
+    return insert_maintain(root); //进行平衡的调节操作，因为是插入调整所以是从父亲节点的角度看
 }
 
 RBTNode *insert(RBTNode *root, int key) {
