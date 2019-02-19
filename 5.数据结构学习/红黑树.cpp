@@ -90,7 +90,7 @@ RBTNode *insert_maintain(RBTNode *root) {
     return root;
 }
 
-//插入操作
+//基本插入操作
 RBTNode *__insert(RBTNode *root, int key) {
     if (root == NIL) return init(key); //如果当前节点已经是虚拟叶子节点，则创建新节点
     if (root->key == key) return root; //如果该权值的节点已经存在则，不作操作直接的返回原节点
@@ -102,90 +102,103 @@ RBTNode *__insert(RBTNode *root, int key) {
     return insert_maintain(root); //进行平衡的调节操作，因为是插入调整所以是从父亲节点的角度看
 }
 
+//完全的插入操纵
 RBTNode *insert(RBTNode *root, int key) {
     root = __insert(root, key);
-    root->color = BLACK;
+    root->color = BLACK; //确保根节点是黑色
     return root;
 }
 
+//寻找前驱
 RBTNode *predecessor(RBTNode *root) {
     RBTNode *temp = root->lchild;
     while (temp->rchild != NIL) temp = temp->rchild;
     return temp;
 }
 
+//删除调整
 RBTNode *erase_maintain(RBTNode *root) {
-    if (root->lchild->color != DOUBLE_BLACK && root->rchild->color != DOUBLE_BLACK) return root;
+    if (root->lchild->color != DOUBLE_BLACK && root->rchild->color != DOUBLE_BLACK) return root; //无双黑节点的情况，即处理了２度红与黑，一度红与０度红的情况
+    //判断是否为一侧双黑另一侧（兄弟节点及其子孩子）无红的情况
     #define UNBALANCE(a, b) (root->a->color == DOUBLE_BLACK && !has_red_child(root->b))
     if (UNBALANCE(lchild, rchild) || UNBALANCE(rchild, lchild)) {
+        //下沉型
         root->color += 1;
         root->lchild->color -= 1;
         root->rchild->color -= 1;
         return root;
     }
     #undef UNBALANCE
-    if (root->lchild->color == DOUBLE_BLACK) {
-        if (root->rchild->color == RED) {
+    if (root->lchild->color == DOUBLE_BLACK) { //当双黑节点在左子树时
+        if (root->rchild->color == RED) { //如果我的兄弟节点是红色，ＲＲ型，大左旋改色
             root = left_rotate(root);
             root->color = BLACK;
             root->lchild->color = RED;
             return erase_maintain(root->lchild);
         }
-        root->lchild->color = BLACK;
-        if (root->rchild->rchild->color != RED) {
+        root->lchild->color = BLACK; //无论是ＲＬ型还是ＲＲ型都会在操作黑将双黑节点转变为单黑节点，所以此操作先置无影响
+        if (root->rchild->rchild->color != RED) { 
+            //因为此时不存在三黑无红的情况，所以通过判断是否为ＲＲ型判断是否为ＲＬ型（因为存在子孩子双红的情况所以不能直接通关判断ＲＬ是否为红型来确定ＲＬ型），如果此时为ＲＬ型则先进性小右旋，将ＲＬ型转化为ＲＲ型
             root->rchild = right_rotate(root->rchild);
             root->rchild->color = BLACK;
             root->rchild->rchild->color = RED;
         }
+        //对ＲＲ型进行大左旋平衡处理
         root = left_rotate(root);
         root->color = root->lchild->color;
-    } else {
-        if (root->lchild->color == RED) {
+    } else { //当双黑节点在右子树时
+        if (root->lchild->color == RED) { //如果我的兄弟节点是红色，ＬＬ型，大右旋改色
             root = right_rotate(root);
             root->color = BLACK;
             root->rchild->color = RED;
             return erase_maintain(root->rchild);
         }
-        root->rchild->color = BLACK;
-        if (root->lchild->lchild->color != RED) {
+        root->rchild->color = BLACK; //无论是ＬＲ型还是ＬＬ型都会在操作后将双黑几点转变为单黑节点，所以此操作无先置影响
+        if (root->lchild->lchild->color != RED) { 
+        //因为此时不存在三黑无红的情况，所以通过判断是否为ＬＬ型判断是否为ＬＲ型（因为存在子孩子双红的情况所以不能直接通关判断ＬＲ是否为红型来确定ＬＲ型），如果此时为ＬＲ型则先进性小右旋，将ＬＲ型转化为ＬＬ型
             root->lchild = left_rotate(root->lchild);
             root->lchild->color = BLACK;
             root->lchild->lchild->color = RED;
         }
+        //对ＬＬ型进行大右旋平衡处理
         root = right_rotate(root);
         root->color = root->rchild->color;
     }
+    //共用的染色处理
     root->lchild->color = root->rchild->color = BLACK;
     return root;
 }
 
+//删除基本操作
 RBTNode *__erase(RBTNode *root, int key) {
-    if (root == NIL) return NIL;
-    if (root->key > key) {
+    if (root == NIL) return NIL; //如果删除节点不存在，则不删除直接返回
+    if (root->key > key) { //如果当前节点比要删除节点大则去左子树寻找
         root->lchild = __erase(root->lchild, key);
-    } else if (root->key < key) {
+    } else if (root->key < key) { //如果当前节点比要删除节点小则去右子树寻找
         root->rchild = __erase(root->rchild, key);
-    } else {
-        if (root->lchild == NIL || root->rchild == NIL) {
-            RBTNode *temp = (root->lchild == NIL ? root->rchild : root->lchild);
-            temp->color += root->color;
-            free(root);
+    } else { //当存一个这样的节点时
+        if (root->lchild == NIL || root->rchild == NIL) { //如果是一个０度或者１度节点
+            RBTNode *temp = (root->lchild == NIL ? root->rchild : root->lchild); //如果是一个０度节点ｔｅｍｐ为虚拟叶子节点，如果为１度节点则为其非空子孩子
+            temp->color += root->color; //如果要删除节点为红色，则对替换节点无影响，如果为黑色，则子替换节点为红色时染黑，为黑色时染为双黑
+            free(root); //释放节点
             return temp;
-        } else {
-            RBTNode *temp = predecessor(root);
-            root->key = temp->key;
-            root->lchild = __erase(root->lchild, temp->key);
+        } else { //删除节点为二度顶点时
+            RBTNode *temp = predecessor(root); //找到删除节点的前驱节点
+            root->key = temp->key; //将前驱节点的值，赋值给欲删除节点，待删除节点颜色不变
+            root->lchild = __erase(root->lchild, temp->key); //转化为删除前驱节点，因为前驱节点必为０度或者１度节点，所以转化为处理０或１度节点问题
         }
     }
-    return erase_maintain(root);
+    return erase_maintain(root); //调整平衡性
 }
 
+//完全的删除操作
 RBTNode *erase(RBTNode *root, int key) {
     root = __erase(root, key);
-    root->color = BLACK;
+    root->color = BLACK; //确保根节点为黑色
     return root;
 }
 
+//清空红黑树
 void clear(RBTNode *node) {
     if (node == NIL) return ;
     clear(node->lchild);
@@ -194,6 +207,7 @@ void clear(RBTNode *node) {
     return ;
 }
 
+//前序遍历输出红黑树
 void output(RBTNode *root) {
     if (root == NIL) return ;
     printf("(%d %d %d) = %d\n", root->key, root->lchild->key, root->rchild->key, root->color);
