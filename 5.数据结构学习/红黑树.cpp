@@ -83,7 +83,7 @@ RBTNode *insert_maintain(RBTNode *root) {
         }
         root = left_rotate(root); //大左旋
     } else {
-        return root; //
+        return root; //如果父系节点里有红节点，但是孙系节点中无红色节点，则不需要处理
     }
     root->color = RED; //将父节点的颜色变为红色
     root->lchild->color = root->rchild->color = BLACK; //他的两个子孩子变为黑色
@@ -134,7 +134,8 @@ RBTNode *erase_maintain(RBTNode *root) {
             root = left_rotate(root);
             root->color = BLACK;
             root->lchild->color = RED;
-            return erase_maintain(root->lchild);
+            root->lchild = erase_maintain(root->lchild);
+            return root;
         }
         root->lchild->color = BLACK; //无论是ＲＬ型还是ＲＲ型都会在操作黑将双黑节点转变为单黑节点，所以此操作先置无影响
         if (root->rchild->rchild->color != RED) { 
@@ -151,7 +152,8 @@ RBTNode *erase_maintain(RBTNode *root) {
             root = right_rotate(root);
             root->color = BLACK;
             root->rchild->color = RED;
-            return erase_maintain(root->rchild);
+            root->rchild = erase_maintain(root->rchild);
+            return root;
         }
         root->rchild->color = BLACK; //无论是ＬＲ型还是ＬＬ型都会在操作后将双黑几点转变为单黑节点，所以此操作无先置影响
         if (root->lchild->lchild->color != RED) { 
