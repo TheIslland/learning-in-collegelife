@@ -120,7 +120,7 @@ RBTNode *predecessor(RBTNode *root) {
 RBTNode *erase_maintain(RBTNode *root) {
     if (root->lchild->color != DOUBLE_BLACK && root->rchild->color != DOUBLE_BLACK) return root; //无双黑节点的情况，即处理了２度红与黑，一度红与０度红的情况
     //判断是否为一侧双黑另一侧（兄弟节点及其子孩子）无红的情况
-    #define UNBALANCE(a, b) (root->a->color == DOUBLE_BLACK && !has_red_child(root->b))
+    #define UNBALANCE(a, b) (root->a->color == DOUBLE_BLACK && root->b->color == BLACK && !has_red_child(root->b))
     if (UNBALANCE(lchild, rchild) || UNBALANCE(rchild, lchild)) {
         //下沉型
         root->color += 1;
