@@ -122,7 +122,7 @@ RBTNode *erase_maintain(RBTNode *root) {
     //判断是否为一侧双黑另一侧（兄弟节点及其子孩子）无红的情况
     #define UNBALANCE(a, b) (root->a->color == DOUBLE_BLACK && root->b->color == BLACK && !has_red_child(root->b))
     if (UNBALANCE(lchild, rchild) || UNBALANCE(rchild, lchild)) {
-        //下沉型
+        //去除子孩子中的双黑节点，将多余的黑色加到父节点中
         root->color += 1;
         root->lchild->color -= 1;
         root->rchild->color -= 1;
