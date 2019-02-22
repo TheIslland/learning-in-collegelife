@@ -12,7 +12,7 @@
 #else
 #define offsetof(TYPE, MEMBER) ((size_t) & ((TYPE *)0)->MEMBER) //返回成员的地址 和偏移量相似
 #endif
-
+//offsetof宏的作用是计算结构体字节数，再通过将首地址减字节数的方法找到结构体首地址
 //type类型 0值空地址 member 把某个字段的地址赋值给相应的指针类型 
 //mptr指向list位置地址  得到相关变量的首地址 
 #define container_of(ptr, type, member) ({ \
