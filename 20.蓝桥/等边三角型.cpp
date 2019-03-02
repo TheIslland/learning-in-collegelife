@@ -21,6 +21,9 @@ int temp[4];
 
 void dfs(int i, int num) {
     temp[num] += a[i];
+    //剪枝2最优性剪枝
+    if (falg) return ;
+    //剪枝３
     if (temp[0] > len || temp[1] > len || temp[2] > len) {
         temp[num] -= a[i];
         return ;
