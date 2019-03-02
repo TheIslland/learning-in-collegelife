@@ -14,7 +14,8 @@
  
 using namespace std;
 
-int n, flag = 0, num, sum = 0, len = 0;
+int n, flag = 0, num, sum = 0;
+double len = 0;
 int a[40];
 int temp[4];
 
@@ -44,8 +45,13 @@ int main() {
         len += a[i];
     }
     len /= 3;
-    dfs(0, 0);
-    if (flag) cout << "yes" << endl;
-    else cout << "no" << endl;
+    //剪支１
+    if (len > (int)len) {
+        cout << "no" << endl;
+    } else {
+        dfs(0, 0);
+        if (flag) cout << "yes" << endl;
+        else cout << "no" << endl;
+    }
     return 0;
 }
