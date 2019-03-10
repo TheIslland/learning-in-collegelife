@@ -132,21 +132,21 @@ void *mycalloc(size_t numitems, size_t size){
 //realloc
 void *myrealloc(void *ptr, size_t size){
     pMetaData p, q, k;
-    p = (pMetaData)(((char *)ptr) - sizeof(MetaData)); 
-    if (p->size >= size) return p->begin;
-    if (p->next == NULL) {
+    p = (pMetaData)(((char *)ptr) - sizeof(MetaData)); //初始化p为ptr的信息头
+    if (p->size >= size) return p->begin; //如果当前段空间比重申请空间大则直接返回
+    if (p->next == NULL) { //如果当前节点为尾节点，则直接向系统申请空间
         if (sbrk(size - p->size) == (void *)-1) {
             return NULL;
         }
         p->size = size;
     }
-    if (p->size < size && p->next && p->next->free) {
-        if (p->size + p->next->size >= size) {
-            q = (pMetaData)(((char *)p->begin) + size);
+    if (p->size < size && p->next && p->next->free) { //如果当前空间比申请空间小且有后继且后继未被占用
+        if (p->size + p->next->size >= size) { //如果当前节点空间和后继结点空间大小之和比扩容大的情况下切分
+            q = (pMetaData)(((char *)p->begin) + size); //初始化q为信息头
             initMetaData(q, p->size + p->next->size - size, 1, p, p->next->next);
             p->next = q;
             p->size = size;
-        } else if (p->size + p->next->size + sizeof(MetaData) >= size) {
+        } else if (p->size + p->next->size + sizeof(MetaData) >= size) { //如果算上后继节点的信息头够用的化就把信息头也算上，不切分
             p->size = p->size + p->next->size + sizeof(MetaData);
             q = p->next->next;
             p->next = q;
