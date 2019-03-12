@@ -28,7 +28,7 @@ static void initMetaData(pMetaData p, size_t size, size_t free, pMetaData prev, 
     p->begin = ((char *)p) + sizeof(MetaData);
 }
 
-//realloc时将原空间元素拷贝至新申请空间
+//realloc时将元素从src空间拷贝至dest空间
 static void dataCopyTo(void *dest, void *src, size_t len) {
     size_t i;
     char *p1 = (char *)dest;
@@ -44,7 +44,7 @@ void *mylloc(size_t sizes){
     pMetaData p, q;
     size_t msize = sizes + sizeof(MetaData); //新申请空间所需占空间大小
     if (__memory_head == NULL) { //如果空间尚未初始化，进行初始化操作
-        p = sbrk(0); //将p初始化指向0位置
+        p = sbrk(0); //sbrk（0）获取当前进程空间brk_end尾地址并让p指向他
         if (sbrk(msize) == (void *)-1) { //如果无法申请msize大小直接返回NULL
             return NULL;
         }
@@ -132,23 +132,23 @@ void *mycalloc(size_t numitems, size_t size){
 //realloc
 void *myrealloc(void *ptr, size_t size){
     pMetaData p, q, k;
-    p = (pMetaData)(((char *)ptr) - sizeof(MetaData)); //初始化p为ptr的信息头
+    p = (pMetaData)(((char *)ptr) - sizeof(MetaData)); //初始化p为ptr(输入指针)的信息头
     if (p->size >= size) return p->begin; //如果当前段空间比重申请空间大则直接返回
-    if (p->next == NULL) { //如果当前节点为尾节点，则直接向系统申请空间
-        if (sbrk(size - p->size) == (void *)-1) {
+    if (p->next == NULL) { //如果当前节点为尾节点，则可以直接向系统再申请空间
+        if (sbrk(size - p->size) == (void *)-1) { //向系统空间申请原空间不够存储的空间
             return NULL;
         }
-        p->size = size;
+        p->size = size; //更新空间大小
     }
     if (p->size < size && p->next && p->next->free) { //如果当前空间比申请空间小且有后继且后继未被占用
-        if (p->size + p->next->size >= size) { //如果当前节点空间和后继结点空间大小之和比扩容大的情况下切分
+        if (p->size + p->next->size >= size) { //如果合并后的大小比重新申请的空间大切分
             q = (pMetaData)(((char *)p->begin) + size); //初始化q为信息头
             initMetaData(q, p->size + p->next->size - size, 1, p, p->next->next);
             p->next = q;
             p->size = size;
-        } else if (p->size + p->next->size + sizeof(MetaData) >= size) { //如果算上后继节点的信息头够用的化就把信息头也算上，不切分
-            p->size = p->size + p->next->size + sizeof(MetaData);
-            q = p->next->next;
+        } else if (p->size + p->next->size + sizeof(MetaData) >= size) { //如果合并后的大小和需求大小正好相等
+            p->size = p->size + p->next->size + sizeof(MetaData); //更新合并后大小
+            q = p->next->next; //更新next指针
             p->next = q;
             if (q != NULL) {
                 q->prev = p;
@@ -156,21 +156,21 @@ void *myrealloc(void *ptr, size_t size){
             p->size = size;
         }
     }
-    if (p->size < size && p->prev && p->prev->free) {
-        if (p->size + p->prev->size >= size) {
+    if (p->size < size && p->prev && p->prev->free) { //如果当前空间不足，但前驱节点存在且未使用
+        if (p->size + p->prev->size >= size) { //如果合并后的大小比重新申请的空间大切分
             q = p->next;
             p = p->prev;
-            size_t ksize = p->size + p->next->size - size;
-            dataCopyTo(p->begin, p->next->begin, p->next->size);
-            k = (pMetaData)(((char *)p->begin) + size);
-            initMetaData(k, ksize, 1, p, q);
-            p->next = k;
+            size_t ksize = p->size + p->next->size - size; //向前合并后并剩余空间大小
+            dataCopyTo(p->begin, p->next->begin, p->next->size); //将内容从p的后继合并至p
+            k = (pMetaData)(((char *)p->begin) + size); //初始化剩余空间信息头
+            initMetaData(k, ksize, 1, p, q); //初始化剩余空间大小信息头k
+            p->next = k; 
             if (q != NULL) {
                 q->prev = k;
             }
             p->size = size;
             p->free = 0;
-        } else if (p->size + p->prev->size + sizeof(MetaData) >= size) {
+        } else if (p->size + p->prev->size + sizeof(MetaData) >= size) { //如果合并后大小正好，不切分
             q = p->next;
             p = p->prev;
             size_t totalsize = p->size + p->next->size + sizeof(MetaData);
@@ -183,11 +183,11 @@ void *myrealloc(void *ptr, size_t size){
             p->free = 0;
         }
     }
-    if (p->size < size) {
-        void *ret = mylloc(size);
+    if (p->size < size) { //如果没有合适空间
+        void *ret = mylloc(size); //申请size大小
         if (ret == NULL) return NULL;
         dataCopyTo(ret, p->begin, p->size);
-        myfree(p->begin);
+        myfree(p->begin); //回收冗余空间
         p = (pMetaData)(((char *)ret) - sizeof(MetaData));
     }
     return p->begin;
