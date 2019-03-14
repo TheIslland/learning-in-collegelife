@@ -12,7 +12,18 @@ using std::cout;
 class ExprTreeEvaluator {
     map<string,int> memory;
 public:
+    ExprTreeEvaluator(ExprTreeEvaluator *next) {
+        this->next = next;
+    }
+    int find(string var) {
+        if (this->memory.find(var) != this->memory.end()) {
+            return this->memory[var];
+        }
+        if (this->next) return this->next->find(var);
+        return 0;
+    }
     int run(pANTLR3_BASE_TREE);
+    ExprTreeEvaluator *next;
 };
 
 pANTLR3_BASE_TREE getChild(pANTLR3_BASE_TREE, unsigned);
@@ -37,7 +48,7 @@ int main(int argc, char* argv[])
 
   pANTLR3_BASE_TREE tree = r.tree;
 
-  ExprTreeEvaluator eval;
+  ExprTreeEvaluator eval(NULL);
   int rr = eval.run(tree);
   cout << "Evaluator result: " << rr << '\n';
 
@@ -53,7 +64,17 @@ int ExprTreeEvaluator::run(pANTLR3_BASE_TREE tree)
 {
     pANTLR3_COMMON_TOKEN tok = tree->getToken(tree);
     if(tok) {
+        // 处理树
         switch(tok->type) {
+        case BLOCK: {
+            ExprTreeEvaluator new_obj(this);
+            int k = tree->getChildCount(tree);
+            int r = 0;
+            for(int i = 0; i < k; i++) {
+                r = new_obj.run(getChild(tree, i));
+            }
+            return r;
+        }
         case INT: {
             const char* s = getText(tree);
             if(s[0] == '~') {
@@ -65,19 +86,23 @@ int ExprTreeEvaluator::run(pANTLR3_BASE_TREE tree)
         }
         case ID: {
             string var(getText(tree));
-            return memory[var];
+            return this->find(var);
         }
-	case COMMA: {
-		int left = run(getChild(tree,0));
-		int right = run(getChild(tree,1));
-		return right;
-	}
-	case PLUS:
+        case COMMA: {
+            int left = run(getChild(tree,0));
+            int right = run(getChild(tree,1));
+            return right;
+        }
+        case PLUS:
             return run(getChild(tree,0)) + run(getChild(tree,1));
         case MINUS:
             return run(getChild(tree,0)) - run(getChild(tree,1));
         case TIMES:
             return run(getChild(tree,0)) * run(getChild(tree,1));
+        /*
+        case DIV:
+            return run(getChild(tree,0)) / run(getChild(tree,1));
+        */
         case ASSIGN: {
             string var(getText(getChild(tree,0)));
             int val = run(getChild(tree,1));
@@ -90,6 +115,7 @@ int ExprTreeEvaluator::run(pANTLR3_BASE_TREE tree)
         }
     }
     else {
+        // 处理森林
         int k = tree->getChildCount(tree);
         int r = 0;
         for(int i = 0; i < k; i++) {
