@@ -12,46 +12,86 @@ options {
 
 // The suffix '^' means make it a root.
 // The suffix '!' means ignore it.
+/*
+OR : '||';  
+AND : '&&';  
+EQ : '==';  
+NEQ : '!=';  
+GT : '>';  
+LT : '<';  
+GTEQ : '>=';  
+LTEQ : '<=';  
+PLUS : '+';  
+MINUS : '-';  
+MULT : '*';  
+DIV : '/';  
+MOD : '%';  
+POW : '^';  
+NOT : '!';  
+  
+SCOL : ';';  
+ASSIGN : '=';  
+OPAR : '(';  
+CPAR : ')';  
+OBRACE : '{';  
+CBRACE : '}';  
+  
+TRUE : 'true';  
+FALSE : 'false';  
+NIL : 'nil';  
+IF : 'if';  
+ELSE : 'else';  
+WHILE : 'while';  
+LOG : 'log';  
+*/
 
-PLUS: '+';
-MINUS: '-';
-COMMA: ',';
-ASSIGN: '=';
 ID: ('a'..'z'|'A'..'Z')+ ;
 INT: '~'? '0'..'9'+ ;
 NEWLINE: '\r'? '\n' ;
 WS : (' '|'\t')+ {$channel = HIDDEN;}; 
-
-dot: expr ((COMMA^) expr)*
-    ;
-
-expr: multExpr ((PLUS^ | MINUS^) multExpr)*
-    ;
-
-
-multExpr
-    : atom (TIMES^ atom)*
-    ;
-
+COMMA: ',';
+ASSIGN: '=';
+PLUS: '+';
+MINUS: '-';
 TIMES: '*';
+DIV: '/';
+BLOCK: '.';
+
+expr: assignExpr ((COMMA^) assignExpr)* 
+    ;
+    
+assignExpr: addexpr
+    | ID ASSIGN addexpr -> ^(ASSIGN ID addexpr)
+    ;
+
+addexpr: multExpr ((PLUS^ | MINUS^) multExpr)*
+    ;
+
+multExpr: atom ((TIMES^ | DIV^) atom)*
+    ;
 
 atom: INT
     | ID
-    | '('! dot ')'!
+    | '('! expr ')'!
     ;
 
 //stmt = statement语句解析规则
-stmt: dot NEWLINE -> dot  // tree rewrite syntax
-    | ID ASSIGN dot NEWLINE -> ^(ASSIGN ID dot) // tree notation
+
+stmt: expr NEWLINE -> expr  // tree rewrite syntax
     | NEWLINE ->   // ignore
+    | block
     ;
 
+block: '{' block_body '}' NEWLINE -> ^(BLOCK block_body)
+    ;
+
+block_body: (stmt)*
+    ;
 
 prog
     : (stmt {pANTLR3_STRING s = $stmt.tree->toStringTree($stmt.tree);
              assert(s->chars);
-             printf(" tree \%s\n", s->chars);
+             printf(" tree is :\%s\n", s->chars);
             }
         )+
     ;
-
