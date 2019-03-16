@@ -1,0 +1,23 @@
+{
+    "server":"0.0.0.0",
+    "local_port":1080,
+    "timeout": 600,
+    "method":"aes-256-cfb",
+    "fast_open": true,
+    "port_password":
+    {
+        "8817": "LaoEhQcP0Zdfg17",
+        "8818": "klfjee80gf00460",
+        "8819": "jEhQcP0Z8lRfG28",
+        "8820": "fdgrhfEdfCdf012",
+        "8821": "aYWpp030gf00P0Z"     
+    },
+    "_comment":
+    {
+        "8817": "des1",
+        "8818": "des2",
+        "8819": "des3",
+        "8820": "des4",
+        "8821": "des5"    
+    }
+}
