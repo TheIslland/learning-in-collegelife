@@ -25,7 +25,7 @@ expr: assignExpr (COMMA^ assignExpr)*
     ;
 
 assignExpr: addExpr
-    | ID ASSIGN expr -> ^(ASSIGN ID expr)
+    | ID ASSIGN addExpr -> ^(ASSIGN ID addExpr)
 	;
 
 addExpr: multExpr ((PLUS^ | MINUS^) multExpr)*
