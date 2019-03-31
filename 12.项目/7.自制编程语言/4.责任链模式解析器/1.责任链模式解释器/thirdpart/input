@@ -1,0 +1,16 @@
+{
+    def ans = 0;
+    for (def i = 2; i < 1000; i = i + 1) {
+        def judg = 1;
+        for (def j = 2; j < i; j = j + 1) {
+            if (i % j == 0) {
+                judg = 0;
+            }
+        }
+        if (judg == 1) {
+            ans = ans + i;
+            print i;
+        }
+    }
+    print ans;
+}
