@@ -1,0 +1,6 @@
+#!/bin/bash
+echo -n "`who am i`" >> log.txt
+i=`who am i | awk '{print $3" "$4}'`
+time=$[$(date +%s)-$(date -d "$i" +%s)]
+echo $[$time/60]
+

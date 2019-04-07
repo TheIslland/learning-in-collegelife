@@ -59,7 +59,7 @@ int main() {
             if (n != 8) break;
     }
     printf("s.select_sort time =");
-    ACQUIRE_TIME(time[0], s.select_sort( arr[0], MAX_N));
+    ACQUIRE_TIME(time[0], s.select_sort(arr[0], MAX_N));
     printf("s.quick_sort time =");
     ACQUIRE_TIME(time[1], s.quick_sort(arr[1], 0, MAX_N - 1));
     printf("s.insert_sort time =");

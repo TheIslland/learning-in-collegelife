@@ -36,5 +36,24 @@ double findMedianSortedArrays(int* nums1, int nums1Size, int* nums2, int nums2Si
 //二分方法，设一个数组有k1个一个数组有k2个合成数组为k = k1 + k2,分别取两个数组的中位数a1 = k1/2, a2 = k2/ 2,比较a1和a2各去掉的那一半后
 //如果为基数取最小的，为偶数取两个之和除２
 double findMedianSortedArrays(int* nums1, int nums1Size, int* nums2, int nums2Size) {
-
+    int n = nums1Size + nums2Size;
+    int mid1 = nums1Size % 2 ? nums1Size / 2 : (nums1Size - 1) / 2, mid2 = nums2Size % 2 ? nums2Size / 2 : (nums2Size - 1) / 2;
+    printf("%d %d num = %d\n", mid1, mid2, n);
+    if (!n) return 0;
+    if (nums1Size == 0) {
+        if (n % 2) {
+            return nums2[mid2];
+        } else {
+            return (nums2[mid2] + nums2[mid2 + 1]) / 2.0;
+        }
+    }
+    if (nums2Size == 0) {
+        if (n % 2) {
+            return nums1[mid1];
+        } else {
+            return (nums1[mid1] + nums1[mid1 + 1]) / 2.0;
+        }
+    }
+    if
 }
+

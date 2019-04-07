@@ -32,7 +32,7 @@ int main() {
     char str[1000];
     scanf("%s", str);
     int len = strlen(str);
-    for (int i = 0; i < str[i]; i++) {
+    for (int i = 0; str[i]; i++) {
         printf("%c\n", str[i]);
         expand(str, i - 1, i + 1, len);
         expand(str, i, i + 1, len);

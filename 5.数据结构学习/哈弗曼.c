@@ -72,8 +72,8 @@ int main() {
     Node **arr = (Node **)malloc(sizeof(Node *) * n);
     Node *root;
     for (int i = 0 ; i < n; i++) {
-        char key[20];;
-        int freq;;
+        char key[20];
+        int freq;
         scanf("%s%d", key, &freq);;
         arr[i] = getNewNode(key[0], freq);
     }

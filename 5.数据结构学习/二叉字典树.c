@@ -13,14 +13,14 @@
 #define BASE_CNT 26
 #define BASE '0'
 
-typedef struct Node {
+typedef struct TrieNode {
     int flag;
-    struct Node **next;
-} Node;
+    struct TrieNode **next;
+} TrieNode;
 
-Node *getNewNode() {
-    Node *p = (Node *)malloc(sizeof(Node));
-    p->next = (Node **)malloc(sizeof(Node *) * 2);
+TrieNode *getNewTrieNode() {
+    TrieNode *p = (TrieNode *)malloc(sizeof(TrieNode));
+    p->next = (TrieNode **)malloc(sizeof(TrieNode *) * 2);
     for (int i = 0; i < 2; i++) {
         p->next[i] = NULL;
     }
@@ -28,19 +28,8 @@ Node *getNewNode() {
     return p;
 }
 
-/*
-void insert(Node *node, const char *str) {
-     Node *p = node;
-    for (int i = 0; str[i]; i++) {
-        if (p->next[str[i] - BASE] == NULL) p->next[str[i] - BASE] = getNewNode();
-    }
-    p->flag = 1;
-    return ;
-}*/
-
-int insert(Node *node, const char *str) {
-     Node *p = node;
-    int cnt = 1;
+int TrieNode_insert(TrieNode *TrieNode, const char *str) {
+     TrieNode *p = TrieNode;
     int len = strlen(str);
     for (int i = 0; str[i]; i += 3) {
         for (int j = 0; j < 3; j++) {
@@ -48,18 +37,18 @@ int insert(Node *node, const char *str) {
             while (num) {
                 int x = num & 1;
                 if (p->next[x] == NULL) {
-                    p->next[x] = getNewNode();
+                    p->next[x] = getNewTrieNode();
                 }
                 p = p->next[x];
                 num /= 2;
             }
         }
+        p->flag += 1;
     }
-    p->flag = 1;
 }
 
-int search(Node *node, const char *str) {
-    Node *p = node;
+int TrieNode_search(TrieNode *TrieNode, const char *str) {
+    TrieNode *p = TrieNode;
     int len = strlen(str);
     for (int i = 0; str[i]; i += 3) {
         for (int j = 0; j < 3; j++) {
@@ -78,19 +67,13 @@ int search(Node *node, const char *str) {
 }
 
 int main() {
-    Node *root = getNewNode();
-    int ans = 0;
-    char str[10000];
+    TrieNode *root = getNewTrieNode();
+    char str[1000][30];
     int n;
     scanf("%d", &n);
-    while (n--) {
-        scanf("%s", str);
-        int temp_len = insert(root, str);
+    for (int i = 0; i < n; i++) {
+        scanf("%s", str[i]);
+        int temp_len = TrieNode_insert(root, str[i]);
     }
-    printf("请查询:\n");
-    char fd[1000];
-    scanf("%s", fd);
-    if (search(root, fd)) printf("%s 在字典中\n", fd);
-    else printf("%s 不在字典中\n", fd);
     return 0;
 }

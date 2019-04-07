@@ -1,13 +1,3 @@
-/*************************************************************************
-	> File Name: LeetCode_1_两数之和.c
-	> Author:TheIslland 
-	> Mail: 861436930@qq.com
-	> Created Time: 2018年11月08日 星期四 18时05分28秒
- ************************************************************************/
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 /**
  * Note: The returned array must be malloced, assume caller calls free().
  */
@@ -62,9 +52,7 @@ int *twoSum(int *nums, int numsSize, int target) {
         }
     }
     return ret;
-}
-*/
-
+}*/
 typedef struct Data {
     int val, ind;
 } Data;

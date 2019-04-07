@@ -19,6 +19,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#define MAXFILE 65535
+
 void func(char *str, char *m, int sockfd) {
     char buf[BUFSIZ] = {0};
     char data[1000] = {0};
@@ -69,7 +71,7 @@ void *func1(void *argv) {
         func_w("./warning_monitoring.sh", fd);        
         func_w("./malicious_process_detection.sh", fd);
         if (fd != -1) close(fd);
-        printf("cds\n");
+        //printf("cds\n"); 
         sleep(10);
     }
 }
@@ -103,7 +105,7 @@ void *alert_func(void *argv) {
 			strncpy(buf + strlen(buf), data, strlen(data));
             flag = 1;
 		}
-		printf("%s\n", buf);
+		//printf("%s\n", buf);
 		pclose(fp2);
         if (flag) {
 			buf[strlen(buf)] = '\n';
@@ -126,9 +128,12 @@ void *soc_func(void *argv) {
     bzero(&(server.sin_zero), 8);
     int fd;
     while ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1); // socket
-    while (connect(fd, (struct sockaddr*)&server, sizeof(struct sockaddr)) == -1);
-    if (fd != -1) close(fd);
-    printf("cds\n");
+    while (1) {
+        while (connect(fd, (struct sockaddr*)&server, sizeof(struct sockaddr)) == -1);
+        if (fd != -1) close(fd);
+        //printf("cds\n");
+        sleep(60);
+    }
     pthread_exit(0);
 }
 
@@ -141,6 +146,8 @@ int main(int argc, char *argv[]) {
     int port = atoi(argv[2]); // int型 端口
     char *host = argv[1]; // 地址
     */
+    pid_t pid = fork();
+    if (pid > 0) exit(0);
     int fd, new_fd, struct_len, numbytes, i;
     struct sockaddr_in server_addr;
     struct sockaddr_in client_addr;
@@ -157,9 +164,9 @@ int main(int argc, char *argv[]) {
     pthread_create(&t, NULL, soc_func, NULL);
     fd = socket(AF_INET, SOCK_STREAM, 0); // socket
     while(bind(fd, (struct sockaddr *)&server_addr, struct_len) == -1); // bind 绑定
-    printf("绑定成功\n");
+    //printf("绑定成功\n");
     while(listen(fd, 10) == -1); // 进入监听状态
-    printf("正在监听中......\n");
+   // printf("正在监听中......\n");
     new_fd = accept(fd, (struct sockaddr *)&client_addr, &struct_len);
     while(1) {
         func("cpu.log", "./cpu_occupy.sh", new_fd);

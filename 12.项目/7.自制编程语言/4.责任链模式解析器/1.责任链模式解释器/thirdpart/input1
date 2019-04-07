@@ -1,0 +1,7 @@
+{
+    def a = 3;
+    do {
+        a = a - 1;
+        print a;
+    } while (a > 1);
+}

@@ -218,10 +218,11 @@ int main() {
     }
     root = build_node(q);
     output(root);
-    Note code[length];
+    Note code[length + 10];
     char buff[40];
     extract_node(root, code, 0, buff);
     for (int i = 0; i <= n; i++) {
+        if (code[i].name) 
         cout << code[i].name << ": " << code[i].buff << endl;
     }
     return 0;

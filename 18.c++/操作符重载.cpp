@@ -29,10 +29,10 @@ public:
     double getI() {
         return this->imag;
     }
-    friend Complex& operator+(const Complex &c1, const Complex &c2);
-    friend Complex& operator-(const Complex &c1, const Complex &c2);
-    friend Complex& operator*(const Complex &c1, const Complex &c2);
-    friend Complex& operator/(const Complex &c1, const Complex &c2);
+    friend Complex operator+(const Complex &c1, const Complex &c2);
+    friend Complex operator-(const Complex &c1, const Complex &c2);
+    friend Complex operator*(const Complex &c1, const Complex &c2);
+    friend Complex operator/(const Complex &c1, const Complex &c2);
     friend bool operator==(const Complex &c1, const Complex &c2);
     friend bool operator!=(const Complex &c1, const Complex &c2);
     Complex& operator=(const Complex &c1) {
@@ -44,29 +44,29 @@ public:
     }
 };
 
-Complex& operator+(const Complex &c1, const Complex &c2) {
-    Complex *ret;
-    ret->real = c1.real + c2.real;
-    ret->imag = c1.imag + c2.imag;
-    return *ret;
+Complex operator+(const Complex &c1, const Complex &c2) {
+    Complex ret;
+    ret.real = c1.real + c2.real;
+    ret.imag = c1.imag + c2.imag;
+    return ret;
 }
-Complex& operator-(const Complex &c1, const Complex &c2) {
-    Complex *ret;
-    ret->real = c1.real - c2.real;
-    ret->imag = c1.imag - c2.imag;
-    return *ret;
+Complex operator-(const Complex &c1, const Complex &c2) {
+    Complex ret;
+    ret.real = c1.real - c2.real;
+    ret.imag = c1.imag - c2.imag;
+    return ret;
 }
-Complex& operator*(const Complex &c1, const Complex &c2) {
-    Complex *ret;
-    ret->real = c1.real * c2.real;
-    ret->imag = c1.imag * c2.imag;
-    return *ret;
+Complex operator*(const Complex &c1, const Complex &c2) {
+    Complex ret;
+    ret.real = c1.real * c2.real;
+    ret.imag = c1.imag * c2.imag;
+    return ret;
 }
-Complex& operator/(const Complex &c1, const Complex &c2) {
-    Complex *ret;
-    ret->real = (c1.real * c2.real + c1.imag * c2.imag) * 1.0 / (c2.real * c2.real + c2.imag * c2.imag) ;
-    ret->imag = (c1.imag * c2.real - c1.real * c2.imag) * 1.0 / (c2.real * c2.real + c2.imag * c2.imag);
-    return *ret;
+Complex operator/(const Complex &c1, const Complex &c2) {
+    Complex ret;
+    ret.real = (c1.real * c2.real + c1.imag * c2.imag) * 1.0 / (c2.real * c2.real + c2.imag * c2.imag) ;
+    ret.imag = (c1.imag * c2.real - c1.real * c2.imag) * 1.0 / (c2.real * c2.real + c2.imag * c2.imag);
+    return ret;
 }
 #define min 0.0000001
 bool operator==(const Complex &c1, const Complex &c2) {

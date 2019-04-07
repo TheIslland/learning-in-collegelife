@@ -33,6 +33,13 @@ HashTable *init_hashtale(int n) {
     h->data = (Node **)calloc(sizeof(Node *), h->size);
     return h;
 }
+int APHash() {
+
+}
+
+int ZobristHash() {
+    
+}
 
 int BKDRHash(char *str) {
     int seed = 31, hash = 0;

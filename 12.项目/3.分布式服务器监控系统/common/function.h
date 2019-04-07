@@ -10,6 +10,34 @@
 
 #define BUFSIZE 1000
 
+int get_conf_value(char *pathname,char *key_name,char *value){
+    char *line;
+    size_t len= 0;
+    ssize_t read;
+    FILE *fp = NULL;
+    fp = fopen(pathname,"r");
+    if (fp == NULL) {
+        perror("fopen:");
+        return -1;
+    }
+
+    while ((read = getline(&line,&len,fp)) > 0) {
+        //printf("%s", line);
+        char *ptr = strstr(line,key_name);
+        if (ptr == NULL) continue;
+        ptr += strlen(key_name);
+        if (*ptr != '=') continue;
+        strncpy(value, (ptr+1), strlen(ptr+2));//strlen(per+2) 少获取一个长度，代表换行
+        int tempvalue = strlen(value);
+        value[tempvalue] = '\0';
+
+        printf("strlen(ptr+1):%d %s", (int)strlen(ptr+1),ptr+1);
+    }  
+    printf("strlen: %d, %s", (int)strlen(value), value);
+    printf("------");
+    return 0;
+}
+
 typedef struct H_Node {
     char *ip;
     int flag;
@@ -273,7 +301,7 @@ void *func1(void *arg) {
             strncpy(data, IP, strlen(IP));
             strncpy(data + strlen(IP), ":\n", 2);
             strncpy(data + 2 + strlen(IP), buff, strlen(buff));
-            fd = fopen("client_warn_information", "a+");
+            fd = fopen("/usr/bin/pihealth/client_warn_information", "a+");
             fwrite(data, sizeof(char), strlen(data), fd);
             fclose(fd);
             memset(buff, 0, sizeof(buff));
@@ -294,14 +322,21 @@ void *func(void *arg) {
         }
         printf("queue is not empty\n");
         Node *temp = pop(q);
-        int con_fd = soc_con(temp->IP, temp->port);
-        if (con_fd < 0) {
-        	change_Hashtable(h, temp->IP);
-            printf("Device --> ip = %s  is not online, change IP state\n", temp->IP);
-            continue;
-        } else {
-            printf("Device --> ip = %s online, start connect...\n", temp->IP);
+        int states = 0, con_fd;
+        for (int i = 0; i < 3; i++) {
+            con_fd = soc_con(temp->IP, temp->port);
+            if (con_fd < 0) {
+        	    change_Hashtable(h, temp->IP);
+                printf("Device --> ip = %s  is not online, change IP state\n", temp->IP);
+                states++;
+                close(con_fd);
+            } else {
+                break;
+            }
+            sleep(10);
         }
+        if (states >= 3) continue;
+        printf("Device --> ip = %s online, start connect...\n", temp->IP);
 		char IP[100];
         int port, numbytes;
         char buff[BUFSIZE] = {0};

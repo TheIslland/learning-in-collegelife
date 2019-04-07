@@ -17,6 +17,7 @@ using namespace std;
 class A {
 public:
     A() { x = 1; }
+    
     int x;
 };
 

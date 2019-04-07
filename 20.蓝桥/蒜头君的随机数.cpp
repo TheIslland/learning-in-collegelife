@@ -8,27 +8,21 @@
 #include <algorithm>
 using namespace std;
 int main() {
-    int n, num[1010] = {0}, temp, ind = 0;
+    int n, a[110] = {0}, num = 0;
     cin >> n;
     for (int i = 0; i < n; i++) {
-		cin >> temp;
-        if (!num[temp]) {
-            num[temp] = temp;
-			ind++;
-        }
+        cin >> a[i];
     }
-    int a[ind] = {0};
-    for (int i = 0, j = 0; i < 1010; i++) {
-		if (num[i]) {
-            a[j] = num[i];
-        	j++;
-        }
+    sort(a, a + n);
+    for (int i = 0; i < n - 1; i++) {
+        if (a[i] == a[i + 1]) continue;
+        num++;
     }
-    sort(a, a + ind);
-    cout << ind << endl;
-    for (int i = 0; i < ind; i++) {
-		cout << a[i];
-        if (i < ind - 1) cout << " ";
+    cout << num + 1 << endl;
+    for (int i = 0; i < n - 1; i++) {
+        if (a[i] == a[i + 1]) continue;
+        cout << a[i] << " ";
     }
+    cout << a[n - 1];
     return 0;
 }

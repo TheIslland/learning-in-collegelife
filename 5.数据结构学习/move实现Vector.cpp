@@ -55,12 +55,10 @@ public:
 		memcpy(items, vector.items, sizeof(T) * count);
   	}
   	Vector(Vector&& vector) :count{ vector.count }, items{ vector.items } {
-  		//TODO
         vector.items = nullptr;
         vector.count = 0;
   	}
   	~Vector() {
-  		//TODO
         for (int i = 0; i < this->count; i++) {
 			this->items[i].~Element();
         }
@@ -79,7 +77,6 @@ public:
     	return count;
     }
   	void Clear() {
-  		//TODO
         for (int i = 0; i < this->count; i++) {
 			this->items[i].~Element();
         }
@@ -89,7 +86,7 @@ public:
   	}
 
   	void Add(const T& item) {
-  		//TODO
+  		//当malloc失败时buffer为空
         T *buffer = (T *)malloc(sizeof(T) * (this->count + 1));
         for (int i = 0; i < this->count; i++) {
             new(buffer + i)Element(std::move(this->items[i]));
@@ -102,7 +99,6 @@ public:
         return ;
   	}
   	bool Insert(const T& item,int index) {
-  		//TODO
         if (index < 0 || index > this->count ) return false;
         T *buffer = (T*)malloc(sizeof(T) * (this->count + 1));
         for (int i = this->count; i > index; i--) {
@@ -119,7 +115,6 @@ public:
         return true;
   	}
   	bool Remove(int index) {
-  		//TODO
         if (index < 0 || index >= this->count) return false;
         T *buffer = (T*)malloc(sizeof(T) * (this->count - 1));
         for (int i = 0; i < this->count - 1; i++) {
@@ -132,7 +127,6 @@ public:
         return true;
   	} 
   	int Contains(const T& item) {
-  		//TODO
     	for (int i = 0; i < this->count; i++) {
 			if (this->items[i] == item) return i;
         }

@@ -1,0 +1,3 @@
+#filename: .back.r
+backup_path=/home/mason/learning-in-collegelife/shell: 
+dest_dir=/home/mason/learning-in-collegelife/shell/save

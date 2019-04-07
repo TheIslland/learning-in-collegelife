@@ -63,7 +63,7 @@ void build_automation(Trie node) {
         TrieNode *now = queue[head++]; //初始化一个ｎｏｗ当前节点为队头节点，用于层次遍历
         for (int i = 0 ; i < SIZE; i++) { //遍历每一个ｎｏｗ当前节点下的每一个孩子节点
             if (now->childs[i] == NULL) { //如果某一孩子节点未被使用
-                if (now != node) now->childs[i] = now->fail->childs[i]; //且这个节点不是根节点，那么就使用这个节点存储ｎｏｗ当前节点的失败指针中应最终指向的childs[i]孩子节点
+                if (now != node) now->childs[i] = now->fail->childs[i]; //经过这一步操作循环２６次会将所有父节点里有的而我本身没有的子节点提取到当前节点的子节点中
                 continue; //跳到下一个
             } //６５行到６８行的这个操作用于初始化线索
             TrieNode *p = (now->fail ? now->fail->childs[i] : node); //６９行到７０行用于初始化下一节点的ｆａｉｌ失败指针，本行用于判断当前节点是否有失败指针，有，则在失败指针的孩子几点中寻找是否有所要查找的childs[i]孩子节点，反之，没有的话，让ｐ指向根节点（问题：什么节点没有失败指针。答：１．根节点，２．根节点下面的第一层孩子节点）

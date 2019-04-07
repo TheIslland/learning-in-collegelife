@@ -8,10 +8,9 @@
 #ifndef _SORT_H
 #define _SORT_H
 
-#include <cassert>
 #include <iostream>
 
-#define MAX_N 30000
+#define MAX_N 30
 
 #define out(arr) {\
     cout << arr << endl;\
@@ -144,19 +143,19 @@ double Sort::merge_sort(int *num, int l, int r) {
     return 1.0;
 }
 
-double Sort::quick_sort(int *num, int l, int r) {
-    while (l < r) {
-        int x = l, y = r, z = num[(l + r) >> 1];
+double Sort::quick_sort(int *num, int left, int right) {
+    while (left < right) {
+        int l = left, r = right, mid = num[(left + right) >> 1];
         do {
-            while(num[x] < z) ++x;
-            while(num[y] > z) --y;
-            if(x <= y) {
-                swap(num[x], num[y]);
-                ++x, --y;
+            while(num[l] < mid) ++l;
+            while(num[r] > mid) --r;
+            if(l <= r) {
+                swap(num[l], num[r]);
+                ++l, --r;
             }
-        } while (x <= y);
-        quick_sort(num, x, r);
-        r = y;
+        } while (l <= r);
+        quick_sort(num, l, right);
+        right = r;
     }
     return 1.0;
 }

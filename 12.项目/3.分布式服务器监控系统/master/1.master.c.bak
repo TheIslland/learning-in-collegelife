@@ -1,0 +1,93 @@
+/*************************************************************************
+	> File Name: master.c
+	> Author:TheIslland 
+	> Mail: 861436930@qq.com
+	> Created Time: 2018年11月20日 星期二 17时49分23秒
+ ************************************************************************/
+
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <stdio.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <pthread.h>
+#include "function.h"
+
+int main(int argc, char *argv[]) {
+    Queue *queue = init(1000);    
+    int fd, new_fd, numbytes,i;
+    struct sockaddr_in server_addr;
+    struct sockaddr_in client_addr;
+    char buff[10000];
+    int struct_len;
+    server_addr.sin_family = AF_INET;
+    //sin.family指协议族
+    server_addr.sin_port = htons(8765);
+    //sin.port存储端口号
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    //按照网络字节顺序存储ｉｐ地址
+    bzero(&(server_addr.sin_zero), 8);
+    //为了让sockeaddr和sockaddr_in两个数据保持大小相同而保留空字节
+    struct_len = sizeof(struct sockaddr_in);
+    //获取sockaddr缓冲区长度
+
+    fd = socket(AF_INET, SOCK_STREAM, 0);
+    //socket函数创建新的套接字，如果创建成功就返回新创建的套接字描述符失败会返回－１
+    while(bind(fd, (struct sockaddr *)&server_addr, struct_len) == -1);
+    //如果绑定成功返回０不成功返回－１无限循环
+    printf("Bind Success!\n");
+    while(listen(fd, 10) == -1);
+    //监听套接字同一时刻监听上限为１０如果成功返回０失败返回－１
+    printf("Listening....\n");
+    printf("Ready for Accept,Waitting...\n");
+    pid_t pid, pid1, pid2, pid3, pid4;
+    printf("建立５个线程\n");
+    int num = 0, onli, q = -1;
+    Hashtable *hashtable = init_hashtable(2000);
+    for (int i = 0; i < 5; i++) {
+        char temp_IP[100] = {0};
+        char temp_port[4] = {0};
+        get_IP("IP.conf", i, temp_IP);
+        get_IP("PORT.conf", i, temp_port);
+        if (Hashtable_insert(hashtable, temp_IP)) {
+            push(queue, temp_IP, atoi(temp_port));
+        }
+    }
+	Var *var = (Var *)malloc(sizeof(Var));
+    var->h = hashtable;
+    var->q = queue;
+	pthread_t t[5];
+    for (int i = 0; i < 2; i++) {
+        pthread_create(&t[i], NULL, func, (void *)var);
+    }
+    while (1) {
+    	new_fd = accept(fd, (struct sockaddr *)&client_addr, &struct_len);
+        //接收连接请求，成功返回客户端的文件描述符，失败返回－１
+        num += 1;
+        printf("Get the client num is %d:\n", num);
+        numbytes = send(new_fd,"Welcome to my server\n",21,0); 
+        printf("新增连接按序号入队");
+        //有新连接就进入队列
+        char *ip = inet_ntoa(client_addr.sin_addr);
+        int port = 8432;
+        if (Hashtable_insert(hashtable, ip)) {
+            push(queue, ip, port);
+            printf("ip:%s push Success!\n", ip);
+        } else {
+            printf("ip:%s already push into the  queue!\n", ip);
+        }
+        //开５个线程不关，队列空就阻塞，队列不空就提取出队
+    }
+    close(fd);
+    return 0;
+}

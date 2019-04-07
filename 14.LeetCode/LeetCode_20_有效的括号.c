@@ -20,7 +20,7 @@ Stack *init(int n) {
 }
 
 void push (Stack *s, char value) {
-    if (s->top + 1 == s->size) return ;
+    if (s->top + 1 >= s->size) return ;
     s->top++;
     s->data[s->top] = value;
     return ;

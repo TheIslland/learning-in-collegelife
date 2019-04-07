@@ -1,0 +1,6 @@
+1.kernel/vsprintf
+2.lib/malloc
+3.include/linux/string.h
+4.include/linux/time.h
+5.include/linux/tcp.h
+
