@@ -1,7 +1,8 @@
 /**
  * Note: The returned array must be malloced, assume caller calls free().
  */
-/*int* twoSum(int* nums, int numsSize, int target) {
+/*第一种解法
+ * int* twoSum(int* nums, int numsSize, int target) {
     int *ans;
     ans = malloc(sizeof(int) * 2);
     for (int i = 0 ; i < numsSize; i++) {
@@ -15,7 +16,8 @@
     } 
     return NULL;
 }*/
-/*#define swap(a, b) {\
+/*第二种解法
+ * #define swap(a, b) {\
     __typeof(a) _temp = (a); (a) = (b); (b) = _temp;\
 }
 void quick_sort(int *num, int l, int r) {
@@ -53,7 +55,8 @@ int *twoSum(int *nums, int numsSize, int target) {
     }
     return ret;
 }*/
-typedef struct Data {
+/*第三种解法
+ * typedef struct Data {
     int val, ind;
 } Data;
 
@@ -116,4 +119,17 @@ int *twoSum(int *nums, int numsSize, int target) {
         insert(h, nums[i], i);
     }
     return ret;
-}
+}*/
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        unordered_map<int, int> m;
+        for (int i = 0; i < nums.size(); ++i) {
+            if (m.count(target - nums[i])) {
+                return {i, m[target - nums[i]]};
+            }
+            m[nums[i]] = i;
+        }
+        return {};
+    }
+};
