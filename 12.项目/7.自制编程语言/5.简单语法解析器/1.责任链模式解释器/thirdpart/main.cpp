@@ -385,3 +385,4 @@ pANTLR3_BASE_TREE getChild(pANTLR3_BASE_TREE tree, unsigned i) {
 const char* getText(pANTLR3_BASE_TREE tree) {
     return (const char*) tree->getText(tree)->chars;
 }
+/**/
