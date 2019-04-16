@@ -54,6 +54,7 @@ auto all_alpha = [](string str) -> bool {
     return true;
 };
 
+//接口类的实现
 class Base {
 public :
     Base() {
