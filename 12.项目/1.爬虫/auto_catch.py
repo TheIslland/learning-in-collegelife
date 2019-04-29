@@ -9,7 +9,7 @@ browser.get("https://www.baidu.com")
 fin = open("./cookie_file", "r")
 for line in fin:
     name, value, domain = line.strip().split("\t")
-    #d = {"name" : name, "value" : value, "domain" : domain}
-    #browser.add_cookie(d)
+    d = {"name" : name, "value" : value, "domain" : domain}
+    browser.add_cookie(d)
 
-browser.get("https://www.jisuanke.com")
+browser.get("https://www.pixiv.net")
