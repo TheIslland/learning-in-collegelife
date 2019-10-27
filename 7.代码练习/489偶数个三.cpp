@@ -15,9 +15,9 @@ int f(int n, int flag) {
     if (n == 1 && flag == 0) return 8;
     if (n == 1 && flag == 1) return 1;
     if (flag == 0) {
-        a[n][flag] = f(n - 1, 1) * 9 + f(n - 1, 0);
+        a[n][flag] = (f(n - 1, 1) * 9 % 12345+  f(n - 1, 0) % 12345) % 12345;
     } else {
-        a[n][flag] = f(n - 1, 0) * 9 + f(n - 1, 1);
+        a[n][flag] = (f(n - 1, 0) * 9 % 12345 + f(n - 1, 1) % 12345) % 12345;
     }
     return a[n][flag];
 }
