@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+
+
 int searchInsert(int* nums, int numsSize, int target) {
     int head = -1, tail = numsSize - 1, mid;
     while (head < tail) {
@@ -17,3 +20,46 @@ int searchInsert(int* nums, int numsSize, int target) {
     }
     return head + 1;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

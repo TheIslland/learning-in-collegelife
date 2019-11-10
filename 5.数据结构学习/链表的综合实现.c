@@ -51,9 +51,22 @@ int erase(List *l, int index) {
     Node *p = &(l->head), *q;
     while (index--) p = p->next;
     q = p->next;
-    p = q->next;
+    p->next = q->next;
     free(q);
     l->length -= 1;
+    return 1;
+}
+
+int reverse(List *l) {
+    if (l == NULL) return 0;
+    Node *p = l->head.next, *q;
+    l->head.next = NULL;
+    while (p != NULL) {
+        q = p->next;
+        p->next = l->head.next;
+        l->head.next = p;
+        p = q;
+    }
     return 1;
 }
 
@@ -95,7 +108,10 @@ int main() {
         index = rand() % (l->length + 3) - 2;
         val = rand() % 100;
         switch(op) {
-            case 0:
+            case 0:{
+                printf("reverse is %d", reverse(l));
+                output(l);
+            } break;
             case 1:
             case 2:{
                 printf("insert %d at %d to the List = %d", 
@@ -103,7 +119,7 @@ int main() {
                 output(l);
             } break;
             case 3: {
-                printf("earse items at %d from list = %d\n", index, erase(l, index));
+               printf("earse items at %d from list = %d\n", index, erase(l, index));
             } break;
 
         }
