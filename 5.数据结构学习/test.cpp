@@ -11,7 +11,6 @@
 #include <string.h>
 
 using namespace std;
-
 typedef struct Stack {
     int *data;
     int top, size;
