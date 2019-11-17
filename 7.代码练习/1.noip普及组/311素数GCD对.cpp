@@ -42,7 +42,7 @@ void init() {
     }
     return;
 }
-int main() {
+int main() { 
     init();
     ll n, k = prime[0], ans = 0;
     cin >> n;
