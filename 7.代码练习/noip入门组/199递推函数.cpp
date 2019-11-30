@@ -21,9 +21,9 @@ ll f(int x, int m) {
     if (x < 10) return x; 
     for (int i = 0; i < 10; i++) {
         if (a[i] == 0) continue;
-        num[x] += (a[i] % m * f(x - i - 1, m) % m) % m;  
+        num[x] += (a[i] * f(x - i - 1, m)) % m;  
     }
-    return num[x];
+    return num[x] % m;
 }
 int main() {
     int k, m;
