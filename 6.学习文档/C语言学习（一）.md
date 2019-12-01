@@ -1,60 +1,131 @@
-# C语言学习（一）
+
+
+# C语言学习
 
 ## 语言入门基础
 
-**(1)输出函的说明**
+* ### **输出函数**
 
-**函数是一个黑箱子，给予一个输入会返回一个输出，函数完成了一个映射，数组是一个展开的函数。 函数比数组节省了空间，数组被称为纪录式，函数是一种计算式个数**
+  * 函数是一个黑箱子，给予一个输入会返回一个输出，函数完成了一个映射，数组是一个展开的函数。 函数比数组节省了空间，数组被称为纪录式，函数是一种计算式个数
 
-**（2）深度神经网络是一个计算式，深度神经网络又被称为可微分编程范式**
+* #### **`printf`函数**
 
-**(3)printf函数**
+  * 头文件 ：`stdio.h`
 
-​	头文件 ：stdio.h
+  * 原型：`int printf(const char *format, ...);`
 
-​	原型：int printf(const char *format, ...);
+  * format :格式控制字符串
 
-​	format :格式控制字符串
+  * ...:可变参数列表
 
-​	...:可变参数列表
+  * 返回值：成功输出的字符个数
 
-​	返回值：成功读入的参数个数
+  * ```c
+    #include<stdio.h>
+    int main() {
+    	int n = printf("Hello world!\n");
+        printf("success print char num is %d\n", n);
+        return 0;
+    }
+    ```
 
-​	当scanf的返回值为-1时，0相当于返回EOF（EOF的值为—1）
+* #### **`scanf`函数**
 
-**(4)sprintf函数**
+  * 返回值为：当成功读入时返回值为的成功读入的参数个数，当读入错误时返回值为0，当遇到错误或者返回`EOF`时返回-1（`EOF`的值为—1）
 
-**字符串输出函数sprintf( fout,"%d",n),fout为输出到的数组，%后为输出的格式，n为**
+  * `printf`获取数字位数
 
-**输出的参数**
+    ```c
+    #include<stdio.h>
+    int main() {
+        int n;
+        scanf("%d", &n);
+        printf("has %d digit\n", printf("%d", n));
+        return 0;
+    }
+    ```
+
+  * `printf`获取输出字符个数
+
+    ```c
+    #include<stdio.h>
+    int main() {
+        char a[100];
+        scanf("%[^\n]s", a);
+        printf(" length is %d\n", printf("%s", a));
+        return 0;
+    }
+    ```
+
+  * 
+
+* #### **`sprintf`函数**
+
+  * 功能：向一个字符串中打印格式控制字符串。
+
+  * 函数`format`:字符串输出函数`sprintf(target string, format string, data)`。
+
+  * ```c
+    int a, b, c, d;
+    char str[1000];
+    scanf("%d %d %d %d", &a, &b, &c, &d);
+    sprintf(str, "%d.%d.%d.%d\n", a, b, c, d);
+    ```
+
+  * 
+
+* #### **`fprintf`函数**
+
+  * 功能将格式控制字符串写入到文件中
+
+  * `format`：`fprintf(File pointer, format string, data);`
+
+  * ```c
+    File *fd = fopen("test", "wb");
+    fprintf(fd, "%s", "test success\n");
+    ```
+
+  * 在终端执行程序时：
+
+    `stdin（Standardinput）`标准输入 0
+
+    `stdout（Standardoutput）`标准输出 1
+
+    `stderr（Standarderror）`标准错误 2
+
+  
 
 ## 数学运算
 
-`=`赋值运算符
+* ### C语言基本运算符
 
-`+ - × /`基本四则运算
+  * | 运算符  |     说明     |               例子                |
+    | :-----: | :----------: | :-------------------------------: |
+    |    =    |  赋值运算符  |              a = b;               |
+    | + - × / | 基本四则运算 |         a = (b + c) * d;          |
+    |    %    |  求余运算符  | (a + b) %c = (a % c + b % c) % c; |
+    | &\| ^ ~ |   位运算符   |           a = ~b \| c;            |
+    | <<、>>  |   左移右移   |            a = b >> 2;            |
 
-`%`求余运算符
+    
 
-`& | ^ ~`位运算符
+* ### C语言常用数学函数（`<math.h>`）
 
-`<< >>`只限于整形，左移是乘以2
+  | 常用函数           | 常用函数   |
+  | ------------------ | ---------- |
+  | `pow(a, n)`        | `fabs(n)`  |
+  | `sqrt(n)`          | `log(n)`   |
+  | `ceil(n)`          | `log10(n)` |
+  | `floor(n)`         | `acos(n)`  |
+  | `abs(n)(stdilb.h)` | ...        |
 
-`% / × +- &`运算速度从慢到快
+  * 常用小技巧：
 
-`%8 = &7 %4=&3` 为什么%6！=&5
+    *  $log_a{b} = \frac{log_c{b}}{log_c{a}}$
+    * $acos（-1）= \pi$
 
-**c语言中的数学函数库<math.h>(abs在stdlib.h中)**
-
-**log(n)是以e为底的对数**
-
-log(n)/log2
-
-acos（-1）= 派
-
-如何求一个函数的立方跟pow（n，1/3）
-
-角度值到弧度值x / 180 ×acos（-1）
+    * 如何求一个函数的立方跟$pow（n,\frac{1}{3}）$
+    * 角度值到弧度值$\frac{x}{180} × acos（-1）$
 
 ## 密训
 
@@ -164,6 +235,10 @@ float SqrtByBisection(float n) //用二分法
 | <、>   | 小于和大于         | a > b、a < b      |
 | <=、>= | 小于等于，大于等于 | a >=b 、a <=b     |
 | !      | 非                 | ！（0）！（NULL） |
+
+
+
+
 
 **`！！（x）` 归一化！？？？？**
 
