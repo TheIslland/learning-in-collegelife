@@ -35,9 +35,10 @@ char a[505][505] = {0};
 int vis[505][505];
 int val = 0, ans = 0, n, m;
 
-void bfs(int i, int j) {
+void bfs(int start_x, int start_y) {
     queue<Node> q;
-    q.push(Node(i, j, 0));
+    q.push(Node(start_x, start_y, 0));
+    vis[start_x][start_y] = 1;
     while (!q.empty()) {
         Node temp = q.front();
         q.pop();
@@ -57,22 +58,22 @@ void bfs(int i, int j) {
         return;
     }
 }
-    int main() {
-        int star_x, star_y;
-        cin >> n >> m;
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= m; j++) {
-                cin >> a[i][j];
-                if (a[i][j] == 's') {
-                    star_x = i;
-                    star_y = j;
-                }
+int main() {
+    int star_x, star_y;
+    cin >> n >> m;
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            cin >> a[i][j];
+            if (a[i][j] == 's') {
+                star_x = i;
+                star_y = j;
             }
         }
-        bfs(star_x, star_y);
-        if (val == -1)
-            cout << "No";
-        else
-            cout << val;
-        return 0;
     }
+    bfs(star_x, star_y);
+    if (val == -1)
+        cout << "No";
+    else
+        cout << val;
+    return 0;
+}
