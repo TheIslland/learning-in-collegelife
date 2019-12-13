@@ -48,9 +48,6 @@ int bfs(int x, int y, char judg) {
         Node temp = q.front();
         // cout << temp.x << " " << temp.y << endl;
         if (a[temp.x][temp.y] == judg) {
-            //a[temp.x][temp.y] = '#';
-            start_x = temp.x;
-            start_y = temp.y;
             return temp.sum;
         }
         q.pop();
@@ -68,39 +65,29 @@ int bfs(int x, int y, char judg) {
 }
 
 int main() {
-    int ans = 0, sum = 0, start_xx, start_yy, end_x, end_y;
+    vector<Node> p;
+    int ans = __INT_MAX__, sum = 0, start_xx, start_yy, end_x, end_y;
     cin >> n >> m;
     for (int i = 1; i <= n; i++) {
         for (int j = 1; j <= m; j++) {
             cin >> a[i][j];
-            (a[i][j] == 'S') && (start_xx = i, start_yy = j);
-            (a[i][j] == 'T') && (end_x = i, end_y = j);
+            scanf("%c", &a[i][j]);
+            if (a[i][j] == 'P') {
+                p.push_back(Node(i, j, 0));
+                continue;
+            }
         }
-        // getchar()
+        getchar();
     }
-    /*while (1) {
-        start_x = start_xx, start_y = start_yy;
-        ans = bfs_1(start_x, start_y);
-        if (ans == -1) break;
+    for (int i = 0; i < p.size(); i++) {
+        start_x = p[i].x;
+        start_y = p[i].y;
+        sum = bfs(start_x, start_y, 'S');
         memset(note, 0, sizeof(note));
-        ans += bfs_2(start_x, start_y);
-        ans < sum && (sum = ans);
+        sum += bfs(start_x, start_y, 'T');
         memset(note, 0, sizeof(note));
-    }*/
-    start_x = start_xx, start_y = start_yy;
-    ans += bfs(start_x, start_y, 'P');
-    memset(note, 0, sizeof(note));
-    ans += bfs(start_x, start_y, 'T');
-    memset(note, 0, sizeof(note));
-    sum += bfs(end_x, end_y, 'P');
-    memset(note, 0, sizeof(note));
-    sum += bfs(start_x, start_y, 'S');
-    if (ans == sum) {
-        printf("%d\n", ans);
-    } else {
-        if (ans > sum) ans = sum;
-        printf("%d\n", ans);
+        ans > sum && (ans = sum);
     }
-
+    cout << ans << endl;
     return 0;
 }
